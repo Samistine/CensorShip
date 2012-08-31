@@ -3,7 +3,6 @@ package de.bw2801.plugins.censorship;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -18,7 +17,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,7 +40,7 @@ public class Censorship extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onChatEvent(PlayerChatEvent event) {
+    public void onChatEvent(AsyncPlayerChatEvent event) {
         String msg = event.getMessage();
         boolean muted = getCustomConfig().getBoolean("players.censorship." + event.getPlayer().getName() + ".muted");
 
@@ -178,26 +177,6 @@ public class Censorship extends JavaPlugin implements Listener {
         }
     }
 
-    public String replace(final String source) {
-        ConfigurationSection sec = getConfig().getConfigurationSection("config.censorship");
-        String result = "";
-        for (String search : sec.getKeys(false)) {
-            final int length = search.length();
-            if (length < 2) {
-                continue;
-            }
-            final StringBuilder sb = new StringBuilder(4 * length - 3);
-            for (int i = 0; i < length - 1; i++) {
-                sb.append(search.charAt(i));
-                sb.append("\\s*");
-            }
-            sb.append(search.charAt(length - 1));
-            System.out.println(sb.toString());
-            result = source.replace(sb.toString(), search);
-        }
-        return result;
-    }
-
     public static String replace(final String source, final String search) {
         final int length = search.length();
         if (length < 2) {
@@ -224,13 +203,9 @@ public class Censorship extends JavaPlugin implements Listener {
                     String path_a = "config.censorship." + word + ".action";
                     String path_d = "config.censorship." + word + ".damage";
 
-                    getConfig().addDefault(path_w, replace);
-                    getConfig().addDefault(path_a, action);
-                    getConfig().addDefault(path_d, damage);
-
-                    getConfig().set(path_w, null);
-                    getConfig().set(path_a, null);
-                    getConfig().set(path_d, null);
+                    getConfig().set(path_w, replace);
+                    getConfig().set(path_a, action);
+                    getConfig().set(path_d, damage);
                     saveConfig();
 
                     if ((sender instanceof Player)) {
@@ -252,21 +227,9 @@ public class Censorship extends JavaPlugin implements Listener {
                     String path_a = "config.censorship." + word + ".action";
                     String path_d = "config.censorship." + word + ".damage";
 
-                    getConfig().addDefault(path_w, null);
-                    getConfig().addDefault(path_a, null);
-                    getConfig().addDefault(path_d, null);
-
-                    getConfig().set(path_w, null);
-                    getConfig().set(path_a, null);
-                    getConfig().set(path_d, null);
-
-                    getConfig().addDefault(path_w, replace);
-                    getConfig().addDefault(path_a, action);
-                    getConfig().addDefault(path_d, damage);
-
-                    getConfig().set(path_w, null);
-                    getConfig().set(path_a, null);
-                    getConfig().set(path_d, null);
+                    getConfig().set(path_w, replace);
+                    getConfig().set(path_a, action);
+                    getConfig().set(path_d, damage);
                     saveConfig();
 
                     if ((sender instanceof Player)) {
@@ -288,11 +251,8 @@ public class Censorship extends JavaPlugin implements Listener {
                     String path_w = "config.censorship." + word + ".replace-with";
                     String path_a = "config.censorship." + word + ".action";
 
-                    getConfig().addDefault(path_w, replace);
-                    getConfig().addDefault(path_a, action);
-
-                    getConfig().set(path_w, null);
-                    getConfig().set(path_a, null);
+                    getConfig().set(path_w, replace);
+                    getConfig().set(path_a, action);
                     saveConfig();
 
                     if ((sender instanceof Player)) {
@@ -311,17 +271,8 @@ public class Censorship extends JavaPlugin implements Listener {
                     String path_w = "config.censorship." + word + ".replace-with";
                     String path_a = "config.censorship." + word + ".action";
 
-                    getConfig().addDefault(path_w, null);
-                    getConfig().addDefault(path_a, null);
-
-                    getConfig().set(path_w, null);
-                    getConfig().set(path_a, null);
-
-                    getConfig().addDefault(path_w, replace);
-                    getConfig().addDefault(path_a, action);
-
-                    getConfig().set(path_w, null);
-                    getConfig().set(path_a, null);
+                    getConfig().set(path_w, replace);
+                    getConfig().set(path_a, action);
                     saveConfig();
 
                     if ((sender instanceof Player)) {
