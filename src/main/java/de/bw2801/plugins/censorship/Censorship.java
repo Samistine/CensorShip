@@ -17,12 +17,19 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Censorship extends JavaPlugin implements Listener {
+public class Censorship extends JavaPlugin
+        implements Listener {
 
+    // ____?*?____??____?__*___?_*__ннннннннн__?ммм???????
+    // ___*_??____??____??*____??____ннннннннн??ммм|::::::^??-^
+    // ____??____?*?____??____??*____ннннннннн??ммм|:::::|??????|
+    // ____*?___??_*___??____*??____*ннннннннн??ммм?O-O----O-O?
+    // NYAN CAT FOR THE WIN!
+    
     Map<Player, Integer> spam;
     private FileConfiguration playerConfig = null;
     private File playerFile = null;
@@ -40,7 +47,7 @@ public class Censorship extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onChatEvent(AsyncPlayerChatEvent event) {
+    public void onChatEvent(PlayerChatEvent event) {
         String msg = event.getMessage();
         boolean muted = getCustomConfig().getBoolean("players.censorship." + event.getPlayer().getName() + ".muted");
 
@@ -50,13 +57,14 @@ public class Censorship extends JavaPlugin implements Listener {
         } else {
             ConfigurationSection sec = getConfig().getConfigurationSection("config.censorship");
             String result = msg;
+            
             for (String search : sec.getKeys(false)) {
                 result = replace(result, search);
             }
-            
+
             StringTokenizer st = new StringTokenizer(result);
             String string = "";
-            
+
             while (st.hasMoreTokens()) {
                 String token = st.nextToken();
                 for (String key : sec.getKeys(false)) {
@@ -70,7 +78,6 @@ public class Censorship extends JavaPlugin implements Listener {
                         try {
                             String replaceWith = getConfig().getString("config.censorship." + key + ".replace-with");
                             token = token.replaceAll(key, replaceWith.toLowerCase());
-                            System.out.println(result);
 
                             String action = getConfig().getString("config.censorship." + key + ".action");
 
@@ -85,8 +92,8 @@ public class Censorship extends JavaPlugin implements Listener {
                             } catch (Exception e) {
                                 String path = "players.censorship." + event.getPlayer().getName() + ".penalty-points";
                                 String path2 = "players.censorship." + event.getPlayer().getName() + ".muted";
-                                getCustomConfig().addDefault(path, 0);
-                                getCustomConfig().addDefault(path2, false);
+                                getCustomConfig().addDefault(path, Integer.valueOf(0));
+                                getCustomConfig().addDefault(path2, Boolean.valueOf(false));
                                 saveCustomConfig();
                                 points = getCustomConfig().getInt("players.censorship." + event.getPlayer().getName() + ".penalty-points");
                             }
@@ -171,18 +178,18 @@ public class Censorship extends JavaPlugin implements Listener {
                         }
                     }
                 }
-                string += token;
+                string = string + token + " ";
             }
             event.setMessage(string);
         }
     }
 
-    public static String replace(final String source, final String search) {
-        final int length = search.length();
+    public static String replace(String source, String search) {
+        int length = search.length();
         if (length < 2) {
             return source;
         }
-        final StringBuilder sb = new StringBuilder(4 * length - 3);
+        StringBuilder sb = new StringBuilder(4 * length - 3);
         for (int i = 0; i < length - 1; i++) {
             sb.append(search.charAt(i));
             sb.append("\\s*");
@@ -203,9 +210,13 @@ public class Censorship extends JavaPlugin implements Listener {
                     String path_a = "config.censorship." + word + ".action";
                     String path_d = "config.censorship." + word + ".damage";
 
-                    getConfig().set(path_w, replace);
-                    getConfig().set(path_a, action);
-                    getConfig().set(path_d, damage);
+                    getConfig().addDefault(path_w, replace);
+                    getConfig().addDefault(path_a, action);
+                    getConfig().addDefault(path_d, damage);
+
+                    getConfig().set(path_w, null);
+                    getConfig().set(path_a, null);
+                    getConfig().set(path_d, null);
                     saveConfig();
 
                     if ((sender instanceof Player)) {
@@ -213,7 +224,6 @@ public class Censorship extends JavaPlugin implements Listener {
                     } else {
                         sender.sendMessage("Added '" + word + "' - Replace with '" + replace + "' - Action: '" + action + "' - Damage: '" + damage + ".");
                     }
-
                 } else {
                     sender.sendMessage(ChatColor.RED + "You don't have permissions to add forbidden words.");
                 }
@@ -227,9 +237,21 @@ public class Censorship extends JavaPlugin implements Listener {
                     String path_a = "config.censorship." + word + ".action";
                     String path_d = "config.censorship." + word + ".damage";
 
-                    getConfig().set(path_w, replace);
-                    getConfig().set(path_a, action);
-                    getConfig().set(path_d, damage);
+                    getConfig().addDefault(path_w, null);
+                    getConfig().addDefault(path_a, null);
+                    getConfig().addDefault(path_d, null);
+
+                    getConfig().set(path_w, null);
+                    getConfig().set(path_a, null);
+                    getConfig().set(path_d, null);
+
+                    getConfig().addDefault(path_w, replace);
+                    getConfig().addDefault(path_a, action);
+                    getConfig().addDefault(path_d, damage);
+
+                    getConfig().set(path_w, null);
+                    getConfig().set(path_a, null);
+                    getConfig().set(path_d, null);
                     saveConfig();
 
                     if ((sender instanceof Player)) {
@@ -237,7 +259,6 @@ public class Censorship extends JavaPlugin implements Listener {
                     } else {
                         sender.sendMessage("Updated '" + word + "' - Replace with '" + replace + "' - Action: '" + action + "' - Damage: '" + damage + ".");
                     }
-
                 } else {
                     sender.sendMessage(ChatColor.RED + "You don't have permissions to update forbidden words.");
                 }
@@ -251,8 +272,11 @@ public class Censorship extends JavaPlugin implements Listener {
                     String path_w = "config.censorship." + word + ".replace-with";
                     String path_a = "config.censorship." + word + ".action";
 
-                    getConfig().set(path_w, replace);
-                    getConfig().set(path_a, action);
+                    getConfig().addDefault(path_w, replace);
+                    getConfig().addDefault(path_a, action);
+
+                    getConfig().set(path_w, null);
+                    getConfig().set(path_a, null);
                     saveConfig();
 
                     if ((sender instanceof Player)) {
@@ -271,8 +295,17 @@ public class Censorship extends JavaPlugin implements Listener {
                     String path_w = "config.censorship." + word + ".replace-with";
                     String path_a = "config.censorship." + word + ".action";
 
-                    getConfig().set(path_w, replace);
-                    getConfig().set(path_a, action);
+                    getConfig().addDefault(path_w, null);
+                    getConfig().addDefault(path_a, null);
+
+                    getConfig().set(path_w, null);
+                    getConfig().set(path_a, null);
+
+                    getConfig().addDefault(path_w, replace);
+                    getConfig().addDefault(path_a, action);
+
+                    getConfig().set(path_w, null);
+                    getConfig().set(path_a, null);
                     saveConfig();
 
                     if ((sender instanceof Player)) {
@@ -349,21 +382,20 @@ public class Censorship extends JavaPlugin implements Listener {
                     sender.sendMessage(ChatColor.RED + "You don't have permissions to remove forbidden words.");
                 }
             }
+        } else if ((sender instanceof Player)) {
+            sender.sendMessage(ChatColor.GOLD + "/censor add <word> <replace-with> <action> [damage]");
+            sender.sendMessage(ChatColor.GOLD + "/censor update <word> <replace-with> <action> [damage]");
+            sender.sendMessage(ChatColor.GOLD + "/censor remove <word>");
+            sender.sendMessage(ChatColor.GOLD + "/censor <player> add <penalty-points>");
+            sender.sendMessage(ChatColor.GOLD + "/censor <player> remove <penalty-points>");
         } else {
-            if ((sender instanceof Player)) {
-                sender.sendMessage(ChatColor.GOLD + "/censor add <word> <replace-with> <action> [damage]");
-                sender.sendMessage(ChatColor.GOLD + "/censor update <word> <replace-with> <action> [damage]");
-                sender.sendMessage(ChatColor.GOLD + "/censor remove <word>");
-                sender.sendMessage(ChatColor.GOLD + "/censor <player> add <penalty-points>");
-                sender.sendMessage(ChatColor.GOLD + "/censor <player> remove <penalty-points>");
-            } else {
-                sender.sendMessage("/censor add <word> <replace-with> <action> [damage]");
-                sender.sendMessage("/censor update <word> <replace-with> <action> [damage]");
-                sender.sendMessage("/censor remove <word>");
-                sender.sendMessage("/censor <player> add <penalty-points>");
-                sender.sendMessage("/censor <player> remove <penalty-points>");
-            }
+            sender.sendMessage("/censor add <word> <replace-with> <action> [damage]");
+            sender.sendMessage("/censor update <word> <replace-with> <action> [damage]");
+            sender.sendMessage("/censor remove <word>");
+            sender.sendMessage("/censor <player> add <penalty-points>");
+            sender.sendMessage("/censor <player> remove <penalty-points>");
         }
+
         return false;
     }
 
@@ -377,15 +409,15 @@ public class Censorship extends JavaPlugin implements Listener {
 
     private void loadConfig() {
         String[] list = {"example-word-to-replace-exception"};
-        
-        getConfig().options().header("Version 1.9");
-        getConfig().addDefault("config.damage.enabled", false);
-        getConfig().addDefault("config.penalty-points.ban.enabled", true);
-        getConfig().addDefault("config.penalty-points.ban.points", 3);
-        getConfig().addDefault("config.penalty-points.mute.enabled", false);
-        getConfig().addDefault("config.penalty-points.mute.points", 3);
-        getConfig().addDefault("config.penalty-points.mute.seconds", 300);
-        getConfig().addDefault("config.command.enabled", false);
+
+        getConfig().options().header("Version 1.9.1");
+        getConfig().addDefault("config.damage.enabled", Boolean.valueOf(false));
+        getConfig().addDefault("config.penalty-points.ban.enabled", Boolean.valueOf(true));
+        getConfig().addDefault("config.penalty-points.ban.points", Integer.valueOf(3));
+        getConfig().addDefault("config.penalty-points.mute.enabled", Boolean.valueOf(false));
+        getConfig().addDefault("config.penalty-points.mute.points", Integer.valueOf(3));
+        getConfig().addDefault("config.penalty-points.mute.seconds", Integer.valueOf(300));
+        getConfig().addDefault("config.command.enabled", Boolean.valueOf(false));
         getConfig().addDefault("config.censorship.example-word-to-replace.replace-with", "***");
         getConfig().addDefault("config.censorship.example-word-to-replace.action", "ban");
         getConfig().addDefault("config.censorship.example-word-to-replace.command", "ban <player> <reason>");
@@ -406,8 +438,7 @@ public class Censorship extends JavaPlugin implements Listener {
         getServer().broadcastMessage(ChatColor.GOLD + player.getName() + ChatColor.WHITE + " is now muted for " + ChatColor.GOLD + minuites + " minuites" + ChatColor.WHITE + ".");
         saveConfig();
 
-        getServer().getScheduler().scheduleAsyncDelayedTask(this, new Runnable() {
-
+        Bukkit.getScheduler().scheduleAsyncDelayedTask(this, new Runnable() {
             public void run() {
                 Censorship.this.getCustomConfig().set("players.censorship." + player.getName() + ".muted", Boolean.valueOf(false));
                 Censorship.this.getCustomConfig().set("players.censorship." + player.getName() + ".penalty-points", Integer.valueOf(0));
