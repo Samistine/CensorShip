@@ -380,7 +380,7 @@ public class Censorship extends JavaPlugin
                     if ((sender instanceof Player)) {
                         sender.sendMessage("Added '" + ChatColor.GOLD + word + ChatColor.WHITE + "' - Replace with '" + ChatColor.GOLD + replace + ChatColor.WHITE + "' - Action: '" + ChatColor.GOLD + action + ChatColor.WHITE + ".");
                     } else {
-                        sender.sendMessage("Added '" + word + "' - Replace with '" + replace + "' - Action: '" + action + ".");
+                        sender.sendMessage("Added '" + word + "' - Replace with '" + replace + "' - Action: '" + action + "'.");
                     }
                 } else {
                     sender.sendMessage(ChatColor.RED + "You don't have permissions to add forbidden words.");
