@@ -3,8 +3,8 @@ package com.bw2801.plugins.censorship;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,20 +22,93 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- * @author Bw2801
- * @date 2012-09-27
- * @version 1.9.4
- */
+public class Censorship extends JavaPlugin
+        implements Listener {
 
-public class Censorship extends JavaPlugin implements Listener {
+//_______________sss$$$$$s$ss
+//___________s$$$ss_______s$$$$sss
+//________s$$ss_________s$$$s__s$$sss
+//______$$$s_________s$$ss___________sss
+//____$$$__________s$$s_______$s_______ss
+//___$$____________$s____s$________$_____ss
+//__$$____________$$______________________ss
+//_$$____ssss_____$___$s___ss__________$s__ss
+//_$____$$$$s$$___$____________s$___________$s
+//s$_____s$s$$$s__s$s_______________________ss
+//$$______$$$s$s____$$________________$s_____s
+//$$_____________ss__$$__s$__________________s
+//s$______s______$$$$s_______________________s
+//_$$_____s_ss$$s___$$__________$s_______s$$$s
+//__$s______$s$$$$s_s$$$s____________s$$$s_$$
+//___$s__________sss___s$$$$s$s$$s$$$$s___$$
+//____$$s___________________sssss_______$$s
+//_____s$$s___________________________$$$
+//_______s$$$s_____________________s$$$
+//__________s$$$$ss$s$s$$$sLGSw$$$$s
+//_______________sssssssssssss
+//___________________________
+//_________________________$$______ss
+//_________________________s$$s__s$$$
+//__________________________$_$$$$e$
+//_______________________sss$s_s__$$
+//_____________________$$$$s______s$$$ss
+//_______________________ss$$_____s$$$$$s
+//_________________________s$_s$s_$
+//_________________________$s$$s$$$s
+//_____s$s____$$
+//______$$$s$s$
+//______$_$$s$$
+//_s$$$ss____$ssss
+//__s$$$$_____$$$$$
+//_____s$_$$_$s______________________ss
+//_____$$$ss$ss___s$ss______________sssss
+//____s$_____$$____s$$s______$$sss$$sss$s_$$$
+//___________________s$$s_s$$$$$ssss_ss$sss$s
+//_____________________s$$$$$$$$s$$$$sssss$$s
+//______________________s$$$$_s$s__s$s_ss$sss$ss
+//_____________________s$s$s_$LG$$s_s$$$ssss$$$$$s
+//________________________$s_$$sssss_s$$$sssss$ss
+//________________________s_s$ss$$s_ss$s$$ss$$$s$$
+//______________________s$$$$s_s$s__ss_sssss$ss$$$ss
+//______________________$$Sws__s$______s$$$ssss$$ssss
+//_____s$$$s______________ss__s$_______$$$$ssss$s$s
+//__s$$$s_s$$$$$$$ss_________$$s__s$s____s$s_sss_$s
+//_$$$$$$$$$$ss$sssss____sss$$s__$$s_____$$s_ss$ss
+//s$s_s_sss____ss$$sssss$ss_______ss$$$s$$s$ss$$$s
+//___________s$$sss$s_s$ssss______s$s$$s$s_sss$s
+//______s$$$$s$s$$s_ss$$ss_______s$$$sss$$s$$s$ss
+//_____$$$s$$s____s$sss$s________ss$$s_$sss$$sssss
+//___s$$$$$s_______ss$s_ss__ssss$$$$ss$s$$$$s
+//___$$sss___________$s___ss_____$ss$$$$$s$$s
+//__s$$s______________s$$sss___s$s$ss$$s_ss_s$$s
+//___s_________________s$$$s__s$ss$s$$s_______s$$s___________s
+//________________________s$s__ss__s$___________s$$s_____ss$s$$s$$s
+//_________________________s$s____________________s$$_s$$$$$ss$ss$ssss
+//___________________________s$$s___________________$$ss$$$sssssss$$$s
+//_____________________________s$$s$$s______sss__s__$$_____ss$ssssse$s
+//_________________________________s$s$$$s__ss___s__s$___sss$$$ss_s$ss
+//_________________________________$____s$s_________$s_s$$ssssss__s$$$s
+//_________________________________ss____ss________s$__s$ssss__s$s$sss
+//_________________________________ss____s$s______s$___ssss$$s_s$ss$_ss
+//__________________________________$s__s$_s$s___s$___s$ss$$$s$s__sss_s
+//__________________________________s$__$$__ss___$s_ss$$s_s$ss$$ss$__s
+//__________________________________$$__ss___s$s_s$_ss$s$$sssssssssss$$s
+//__________________________________s$__ss____ss__s$_ss$s$ssssss__ssss$s
+//__________________________________s_s$s______ss_s$s$$ss_s$ss$$__$s___s
+//_________________________________ss$$s______ss$_$ss$s$$$$sssss____s$s
+//____________________________ss$sss$$s_____sss$$s_$ssss$ss_ssssss$sss$
+//__________________________s$$$ssss$s___s$$$_s$$s_s$$$s__sssss$$$sss
+//________________________s$$$$$$$$$s___s$$$$$$$s_sss_sss_s$ssss$ss$s
+//_______________________s$s_$$sss____s$$ss$s$$s_s$$$s$ss$sss$$sss$$
+//____________________________________ss__________ss___s$$s$____ss
+    Map<Player, Integer> spam;
+    private FileConfiguration playerConfig = null;
+    private File playerFile = null;
 
-    @Override
     public void onDisable() {
         System.out.println(this + " disabled!");
     }
 
-    @Override
     public void onEnable() {
         loadConfig();
         loadPlayerConfig();
@@ -45,17 +118,16 @@ public class Censorship extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
+    public void onChatEvent(AsyncPlayerChatEvent event) {
         String msg = event.getMessage();
-        boolean isMuted = getCustomConfig().getBoolean("players.censorship." + event.getPlayer().getName() + ".muted");
+        boolean muted = getCustomConfig().getBoolean("players.censorship." + event.getPlayer().getName() + ".muted");
 
-        if (isMuted) {
+        if (muted) {
             event.getPlayer().sendMessage("You are muted! Nobody can hear you!");
             event.setCancelled(true);
         } else {
             ConfigurationSection sec = getConfig().getConfigurationSection("config.censorship");
             String result = msg;
-            List<String> actions = new ArrayList<String>();
 
             for (String search : sec.getKeys(false)) {
                 result = replace(result, search);
@@ -65,114 +137,138 @@ public class Censorship extends JavaPlugin implements Listener {
             String string = "";
 
             while (st.hasMoreTokens()) {
-                String token = st.nextToken().toLowerCase();
+                String token = st.nextToken();
                 for (String key : sec.getKeys(false)) {
                     boolean contains = false;
-                    for (String item : getConfig().getStringList("config.censorship." + key.toLowerCase() + ".exceptions")) {
-                        if (token.contains(item.toLowerCase())) {
+                    for (String item : getConfig().getStringList("config.censorship." + key + ".exceptions")) {
+                        if (token.contains(item)) {
                             contains = true;
                         }
                     }
                     if (!contains) {
-                        if (token.contains(key.toLowerCase())) {
-                            String action = "none";
-                            String cmd = "";
-                            int pp = 1;
-                            String replaceWith = "";
-                            for (int i = 0; i < key.length(); i++) {
-                                replaceWith += "*";
-                            }
-                            String rs = "";
-                            int dmg = 0;
+                        try {
+                            String replaceWith = getConfig().getString("config.censorship." + key + ".replace-with");
+                            token = token.replaceAll(key, replaceWith.toLowerCase());
 
+                            String action = getConfig().getString("config.censorship." + key + ".action");
+
+                            boolean damage = getConfig().getBoolean("config.damage.enabled");
+                            int damageValue = getConfig().getInt("config.censorship." + key + ".damage");
+                            boolean command = getConfig().getBoolean("config.command.enabled");
+                            boolean mute = getConfig().getBoolean("config.penalty-points.mute.enabled");
+                            boolean point = getConfig().getBoolean("config.penalty-points.ban.enabled");
+                            int points;
                             try {
-                                if (getConfig().getString("config.censorship." + key.toLowerCase() + ".action") != null) {
-                                    action = getConfig().getString("config.censorship." + key.toLowerCase() + ".action");
-                                }
-                                if (getConfig().getString("config.censorship." + key.toLowerCase() + ".command") != null) {
-                                    cmd = getConfig().getString("config.censorship." + key.toLowerCase() + ".command");
-                                }
-                                if (getConfig().getString("config.censorship." + key.toLowerCase() + ".replace-with") != null) {
-                                    replaceWith = getConfig().getString("config.censorship." + key.toLowerCase() + ".replace-with");
-                                }
-                                if (getConfig().getString("config.censorship." + key.toLowerCase() + ".mcbans.reason") != null) {
-                                    rs = getConfig().getString("config.censorship." + key.toLowerCase() + ".mcbans.reason");
-                                }
-                                pp = getConfig().getInt("config.censorship." + key.toLowerCase() + ".penalty-points");
-                                dmg = getConfig().getInt("config.censorship." + key.toLowerCase() + ".damage");
+                                points = getCustomConfig().getInt("players.censorship." + event.getPlayer().getName() + ".penalty-points");
                             } catch (Exception e) {
-                                System.out.println("[CensorShip] Could not pass word and used default settings.");
+                                String path = "players.censorship." + event.getPlayer().getName() + ".penalty-points";
+                                String path2 = "players.censorship." + event.getPlayer().getName() + ".muted";
+                                getCustomConfig().addDefault(path, Integer.valueOf(0));
+                                getCustomConfig().addDefault(path2, Boolean.valueOf(false));
+                                saveCustomConfig();
+                                points = getCustomConfig().getInt("players.censorship." + event.getPlayer().getName() + ".penalty-points");
                             }
-                            token = token.replaceAll(key.toLowerCase(), replaceWith.toLowerCase()) + " ";
 
-                            actions.add(action);
-                            actions.add("pp:" + pp);
-                            actions.add("dmg:" + dmg);
-                            actions.add("cmd:" + cmd.replaceAll("<player>", event.getPlayer().getName()).replaceAll("<target>", event.getPlayer().getName()).replaceAll("%player", event.getPlayer().getName()).replaceAll("%target", event.getPlayer().getName()).replaceAll("<reason>", rs).replaceAll("%reason", rs));
+                            int addpoints = getConfig().getInt("config.censorship." + key + ".penalty-points");
+                            int mp = getConfig().getInt("config.penalty-points.mute.points");
+                            int maxpoints = getConfig().getInt("config.penalty-points.ban.points");
+                            String ban2message = "You were banned, becuase of overusing forbidden words.";
+                            String kickmessage = "You were kicked. The word " + ChatColor.GOLD + key + ChatColor.WHITE + " is not allowed on this server.";
+                            String banmessage = "You were banned. The word " + ChatColor.GOLD + key + ChatColor.WHITE + " is not allowed on this server.";
+
+                            if (damage) {
+                                event.getPlayer().setHealth(event.getPlayer().getHealth() - damageValue);
+                                event.getPlayer().sendMessage("You were damaged for using forbidden word(s).");
+                            }
+                            if (command) {
+                                String reason = getConfig().getString("config.censorship." + key + ".mcbans.reason");
+                                String cmnd = getConfig().getString("config.censorship." + key + ".command");
+                                cmnd = cmnd.replaceAll("<player>", event.getPlayer().getName()).replaceAll("<target>", event.getPlayer().getName()).replaceAll("%player", event.getPlayer().getName()).replaceAll("%target", event.getPlayer().getName()).replaceAll("<reason>", reason).replaceAll("%reason", reason);
+                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmnd);
+                            }
+
+                            if (!event.getPlayer().hasPermission("censor.disallow")) {
+                                if (point) {
+                                    if (points >= maxpoints - 1) {
+                                        points = maxpoints;
+
+                                        getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", Integer.valueOf(points));
+                                        saveCustomConfig();
+
+                                        event.getPlayer().kickPlayer(ban2message);
+                                        event.getPlayer().setBanned(true);
+                                        getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was banned for overusing forbidden words.");
+                                    } else if ("ban".equals(action)) {
+                                        points += addpoints;
+                                        getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", Integer.valueOf(points));
+                                        saveCustomConfig();
+
+                                        event.getPlayer().kickPlayer(banmessage);
+                                        event.getPlayer().setBanned(true);
+                                        getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was banned for using forbidden word(s).");
+                                    } else if ("kick".equals(action)) {
+                                        points += addpoints;
+                                        getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", Integer.valueOf(points));
+                                        saveCustomConfig();
+
+                                        event.getPlayer().kickPlayer(kickmessage);
+                                        getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was kicked for using forbidden word(s).");
+                                    }
+                                } else if (mute == true) {
+                                    if (points >= mp - 1) {
+                                        points = mp;
+                                        getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", Integer.valueOf(points));
+                                        setmute(event.getPlayer());
+                                        saveCustomConfig();
+                                    } else if ("ban".equals(action)) {
+                                        points += addpoints;
+                                        getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", Integer.valueOf(points));
+                                        saveCustomConfig();
+
+                                        event.getPlayer().kickPlayer(banmessage);
+                                        event.getPlayer().setBanned(true);
+                                        getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was banned for using forbidden word(s).");
+                                    } else if ("kick".equals(action)) {
+                                        points += addpoints;
+                                        getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", Integer.valueOf(points));
+                                        saveCustomConfig();
+
+                                        event.getPlayer().kickPlayer(kickmessage);
+                                        getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was kicked for using forbidden word(s).");
+                                    }
+                                } else if ("kick".equals(action)) {
+                                    event.getPlayer().kickPlayer(kickmessage);
+                                    getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was kicked for using forbidden word(s).");
+                                } else if ("ban".equals(action)) {
+                                    event.getPlayer().kickPlayer(banmessage);
+                                    event.getPlayer().setBanned(true);
+                                    getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was banned for using forbidden word(s).");
+                                }
+                            }
+                        } catch (Exception e) {
                         }
                     }
                 }
                 string = string + token + " ";
             }
-
             event.setMessage(string);
-
-            if (event.getPlayer().hasPermission("censor.disallow")) {
-                return;
-            }
-
-            int mp = getConfig().getInt("config.penalty-points.mute.points");
-            int bp = getConfig().getInt("config.penalty-points.ban.points");
-
-            for (String action : actions) {
-                if (action.startsWith("cmd:") && getConfig().getBoolean("config.command.enabled")) {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), action.replace("cmd:", ""));
-                }
-                if (action.startsWith("dmg:") && getConfig().getBoolean("config.damage.enabled")) {
-                    event.getPlayer().setHealth(event.getPlayer().getHealth() - Integer.parseInt(action.replace("dmg:", "")));
-                    event.getPlayer().sendMessage("You were damaged for using forbidden word(s).");
-                }
-                if (action.equals("ban")) {
-                    event.getPlayer().setBanned(true);
-                    event.getPlayer().kickPlayer("You were banned for using forbidden word(s) in chat.");
-                    getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was kicked for using forbidden word(s).");
-
-                    return;
-                } else if (action.equals("kick")) {
-                    event.getPlayer().kickPlayer("You were kicked for using forbidden word(s) in chat.");
-                    getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was kicked for using forbidden word(s).");
-
-                    return;
-                }
-                if (action.startsWith("pp:")) {
-                    int points = Integer.parseInt(action.replace("pp:", ""));
-                    points += getCustomConfig().getInt("players.censorship." + event.getPlayer().getName() + ".penalty-points");
-
-
-                    if (points >= bp) {
-                        if (getConfig().getBoolean("config.penalty-points.ban.enabled")) {
-                            event.getPlayer().kickPlayer("You were banned, because of overusing forbidden words.");
-                            event.getPlayer().setBanned(true);
-                            getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", points);
-                            saveCustomConfig();
-
-                            return;
-                        }
-                    }
-
-                    if (getConfig().getBoolean("config.penalty-points.mute.enabled")) {
-                        if (points >= mp - 1) {
-                            getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", points);
-                            setMute(event.getPlayer());
-                            saveCustomConfig();
-                        }
-                    }
-                }
-            }
         }
     }
 
-    @Override
+    public static String replace(String source, String search) {
+        int length = search.length();
+        if (length < 2) {
+            return source;
+        }
+        StringBuilder sb = new StringBuilder(4 * length - 3);
+        for (int i = 0; i < length - 1; i++) {
+            sb.append(search.charAt(i));
+            sb.append("\\s*");
+        }
+        sb.append(search.charAt(length - 1));
+        return source.replaceAll(sb.toString(), search);
+    }
+
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 5) {
             if (args[0].equals("add")) {
@@ -190,7 +286,7 @@ public class Censorship extends JavaPlugin implements Listener {
                     getConfig().addDefault(path_p, 0);
                     getConfig().addDefault(path_a, action);
                     getConfig().addDefault(path_d, damage);
-
+                    
                     getConfig().set(path_w, replace);
                     getConfig().set(path_p, 0);
                     getConfig().set(path_a, action);
@@ -219,7 +315,7 @@ public class Censorship extends JavaPlugin implements Listener {
                     getConfig().addDefault(path_p, 0);
                     getConfig().addDefault(path_a, action);
                     getConfig().addDefault(path_d, damage);
-
+                    
                     getConfig().set(path_w, replace);
                     getConfig().set(path_p, 0);
                     getConfig().set(path_a, action);
@@ -277,7 +373,7 @@ public class Censorship extends JavaPlugin implements Listener {
                     getConfig().set(path_w, replace);
                     getConfig().set(path_a, action);
                     getConfig().set(path_p, 0);
-
+                    
                     saveConfig();
                     reloadConfig();
 
@@ -388,20 +484,6 @@ public class Censorship extends JavaPlugin implements Listener {
         return false;
     }
 
-    private String replace(String source, String search) {
-        int length = search.length();
-        if (length < 2) {
-            return source;
-        }
-        StringBuilder sb = new StringBuilder(4 * length - 3);
-        for (int i = 0; i < length - 1; i++) {
-            sb.append(search.charAt(i));
-            sb.append("\\s*");
-        }
-        sb.append(search.charAt(length - 1));
-        return source.replaceAll(sb.toString(), search);
-    }
-
     private void loadPlayerConfig() {
         String players = "players.censorship";
         getCustomConfig().addDefault(players, null);
@@ -411,7 +493,7 @@ public class Censorship extends JavaPlugin implements Listener {
     }
 
     private void loadConfig() {
-
+        
         String[] list = {"example-word-to-replace-exception"};
 
         String comment = "Thank you for downloading this plugin. In the next lines are tips to add/edit words in the config.\n"
@@ -441,9 +523,9 @@ public class Censorship extends JavaPlugin implements Listener {
                 + "      exception:\n"
                 + "      - Godship\n"
                 + "      - Godsons\n";
-
+        
         getConfig().options().header(comment);
-
+        
         getConfig().addDefault("config.damage.enabled", Boolean.valueOf(false));
         getConfig().addDefault("config.penalty-points.ban.enabled", Boolean.valueOf(true));
         getConfig().addDefault("config.penalty-points.ban.points", Integer.valueOf(3));
@@ -458,7 +540,7 @@ public class Censorship extends JavaPlugin implements Listener {
         reloadConfig();
     }
 
-    public void setMute(final Player player) {
+    public void setmute(final Player player) {
         int sec = getConfig().getInt("config.penalty-points.mute.seconds");
         long seconds = 20 * sec;
         double minuites = 20 * sec / 1200;
@@ -470,10 +552,10 @@ public class Censorship extends JavaPlugin implements Listener {
         Bukkit.getScheduler().scheduleAsyncDelayedTask(this, new Runnable() {
 
             public void run() {
-                getCustomConfig().set("players.censorship." + player.getName() + ".muted", Boolean.valueOf(false));
-                getCustomConfig().set("players.censorship." + player.getName() + ".penalty-points", Integer.valueOf(0));
-                getServer().broadcastMessage(ChatColor.GOLD + player.getName() + ChatColor.WHITE + " is no longer muted.");
-                saveCustomConfig();
+                Censorship.this.getCustomConfig().set("players.censorship." + player.getName() + ".muted", Boolean.valueOf(false));
+                Censorship.this.getCustomConfig().set("players.censorship." + player.getName() + ".penalty-points", Integer.valueOf(0));
+                Censorship.this.getServer().broadcastMessage(ChatColor.GOLD + player.getName() + ChatColor.WHITE + " is no longer muted.");
+                Censorship.this.saveCustomConfig();
             }
         }, seconds);
     }
@@ -483,11 +565,9 @@ public class Censorship extends JavaPlugin implements Listener {
         boolean muted = getConfig().getBoolean("players.censorship." + event.getPlayer() + ".muted");
 
         if (muted == true) {
-            setMute(event.getPlayer());
+            setmute(event.getPlayer());
         }
     }
-    private FileConfiguration playerConfig = null;
-    private File playerFile = null;
 
     public void reloadCustomConfig() {
         if (this.playerFile == null) {
