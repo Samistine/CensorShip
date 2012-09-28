@@ -25,7 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 /**
  * @author Bw2801
  * @date 2012-09-27
- * @version 1.9.4
+ * @version 1.9.5
  */
 
 public class Censorship extends JavaPlugin implements Listener {
@@ -65,16 +65,16 @@ public class Censorship extends JavaPlugin implements Listener {
             String string = "";
 
             while (st.hasMoreTokens()) {
-                String token = st.nextToken().toLowerCase();
+                String token = st.nextToken();
                 for (String key : sec.getKeys(false)) {
                     boolean contains = false;
                     for (String item : getConfig().getStringList("config.censorship." + key.toLowerCase() + ".exceptions")) {
-                        if (token.contains(item.toLowerCase())) {
+                        if (token.toLowerCase().contains(item.toLowerCase())) {
                             contains = true;
                         }
                     }
                     if (!contains) {
-                        if (token.contains(key.toLowerCase())) {
+                        if (token.toLowerCase().contains(key.toLowerCase())) {
                             String action = "none";
                             String cmd = "";
                             int pp = 1;
@@ -84,7 +84,7 @@ public class Censorship extends JavaPlugin implements Listener {
                             }
                             String rs = "";
                             int dmg = 0;
-
+                            
                             try {
                                 if (getConfig().getString("config.censorship." + key.toLowerCase() + ".action") != null) {
                                     action = getConfig().getString("config.censorship." + key.toLowerCase() + ".action");
@@ -103,8 +103,25 @@ public class Censorship extends JavaPlugin implements Listener {
                             } catch (Exception e) {
                                 System.out.println("[CensorShip] Could not pass word and used default settings.");
                             }
-                            token = token.replaceAll(key.toLowerCase(), replaceWith.toLowerCase()) + " ";
+                            
+                            List<Integer> positions = new ArrayList<Integer>();
+                            
+                            for (int i=0; i < token.length(); i++) {
+                                if (Character.isUpperCase(token.charAt(i))) {
+                                    positions.add(i);
+                                }
+                            }
+                            
+                            if (token.toLowerCase().contains(key.toLowerCase())) {
+                                token = token.toLowerCase().replaceAll(key.toLowerCase(), replaceWith.toLowerCase());
+                            }
 
+                            for (int i : positions) {
+                                if (i < token.length()) {
+                                    Character.toUpperCase(token.charAt(i));
+                                }
+                            }
+                            
                             actions.add(action);
                             actions.add("pp:" + pp);
                             actions.add("dmg:" + dmg);
@@ -388,6 +405,13 @@ public class Censorship extends JavaPlugin implements Listener {
     }
 
     private String replace(String source, String search) {
+        List<String> words = new ArrayList<String>();
+        StringTokenizer st = new StringTokenizer(source);
+        
+        while(st.hasMoreTokens()) {
+            words.add(st.nextToken());
+        }
+        
         int length = search.length();
         if (length < 2) {
             return source;
@@ -395,10 +419,25 @@ public class Censorship extends JavaPlugin implements Listener {
         StringBuilder sb = new StringBuilder(4 * length - 3);
         for (int i = 0; i < length - 1; i++) {
             sb.append(search.charAt(i));
-            sb.append("\\s*");
+            sb.append("\\s*\\W*");
         }
         sb.append(search.charAt(length - 1));
-        return source.replaceAll(sb.toString(), search);
+        
+        source = source.toLowerCase().replaceAll(sb.toString().toLowerCase(), search.toLowerCase());
+        st = new StringTokenizer(source);
+        
+        while(st.hasMoreTokens()) {
+            String token = st.nextToken();
+            for (int i=0; i < words.size(); i++) {
+                if (words.get(i).toLowerCase().equals(token)) {
+                    source = source.replaceAll(token, words.get(i));
+                    words.remove(i);
+                    break;
+                }
+            }
+        }
+        
+        return source;
     }
 
     private void loadPlayerConfig() {
