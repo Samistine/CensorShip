@@ -480,7 +480,6 @@ public class Censorship extends JavaPlugin
             sender.sendMessage(ChatColor.GOLD + "/censor <player> add <penalty-points>");
             sender.sendMessage(ChatColor.GOLD + "/censor <player> remove <penalty-points>");
         }
-
         return false;
     }
 
