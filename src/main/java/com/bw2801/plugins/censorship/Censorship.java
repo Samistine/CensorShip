@@ -1,8 +1,15 @@
 package com.bw2801.plugins.censorship;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -24,10 +31,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * @author Bw2801
- * @date 2012-09-27
- * @version 1.9.5
+ * @date 2012-11-19
+ * @version 1.9.6
+ * 
+ * @fixed error / spamming on using "?", "!", "." and ","
+ * @added auto staff notification
+ * @added auto updating
  */
-
 public class Censorship extends JavaPlugin implements Listener {
 
     @Override
@@ -37,6 +47,8 @@ public class Censorship extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        checkVersion();
+
         loadConfig();
         loadPlayerConfig();
 
@@ -44,10 +56,80 @@ public class Censorship extends JavaPlugin implements Listener {
         System.out.println(this + " enabled!");
     }
 
+    public void checkVersion() {
+        if (getConfig().getBoolean("config.autoupdate.check")) {
+            BufferedReader buffer = null;
+            try {
+                String webnames = "http://evergenstudios.6te.net/bw2801/censorship.php?p=cs";
+                URL url = new URL(webnames);
+                URLConnection urlc = url.openConnection();
+                buffer = new BufferedReader(new InputStreamReader(urlc.getInputStream(), "UTF8"));
+                String version = "";
+                String link = "";
+                String date = "";
+                for (int i = 0; i < 3; i++) {
+                    if (i == 0) {
+                        version = buffer.readLine();
+                    } else if (i == 1) {
+                        link = buffer.readLine();
+                    } else if (i == 2) {
+                        date = buffer.readLine();
+                    }
+                }
+
+                if (!version.equals(this.toString().replaceAll("CensorShip v", ""))) {
+                    System.out.println(
+                            "\n\u001B[33m=========CensorShip========="
+                            + "\n\u001B[33mLast updated: " + date
+                            + "\n\u001B[33mLatest Version: " + version
+                            + "\n\u001B[33mDownload: " + link
+                            + "\n\u001B[33m============================\u001B[37m");
+
+                    if (getConfig().getBoolean("config.autoupdate.download")) {
+                        System.out.println("[CensorShip] \u001B[33mDownloading latest version...\u001B[37m");
+                        URL website = new URL(link);
+                        ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+                        FileOutputStream fos = new FileOutputStream("plugins/CensorShip-dwnl-" + version + ".jar");
+                        fos.getChannel().transferFrom(rbc, 0, 1 << 24);
+                        System.out.println("[CensorShip] \u001B[32mLatest version downloaded. Please stop the server and remove the old version. Then restart.\u001B[37m");
+                    }
+                } else {
+                    System.out.println(
+                            "\n\u001B[32m=========CensorShip========="
+                            + "\n\u001B[32mYou are using the lastest"
+                            + "\n\u001B[32mVersion."
+                            + "\n\u001B[32m============================\u001B[37m");
+                }
+
+                buffer.close();
+            } catch (Exception ex) {
+                System.out.println(
+                        "\n\u001B[31m=========CensorShip========="
+                        + "\n\u001B[31mCould not check Version."
+                        + "\n\u001B[31m============================\u001B[37m");
+            }
+        }
+    }
+
+    public static FileConfiguration getConfiguration() {
+        Censorship cs = new Censorship();
+        return cs.getConfig();
+    }
+
+    public static FileConfiguration getCustomConfiguration() {
+        Censorship cs = new Censorship();
+        return cs.getCustomConfig();
+    }
+
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         String msg = event.getMessage();
-        boolean isMuted = getCustomConfig().getBoolean("players.censorship." + event.getPlayer().getName() + ".muted");
+        boolean isMuted = false;
+        try {
+            isMuted = getCustomConfig().getBoolean("players.censorship." + event.getPlayer().getName() + ".muted");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (isMuted) {
             event.getPlayer().sendMessage("You are muted! Nobody can hear you!");
@@ -57,8 +139,10 @@ public class Censorship extends JavaPlugin implements Listener {
             String result = msg;
             List<String> actions = new ArrayList<String>();
 
-            for (String search : sec.getKeys(false)) {
-                result = replace(result, search);
+            if (sec.getKeys(false) != null) {
+                for (String search : sec.getKeys(false)) {
+                    result = replace(result, search);
+                }
             }
 
             StringTokenizer st = new StringTokenizer(result);
@@ -84,7 +168,7 @@ public class Censorship extends JavaPlugin implements Listener {
                             }
                             String rs = "";
                             int dmg = 0;
-                            
+
                             try {
                                 if (getConfig().getString("config.censorship." + key.toLowerCase() + ".action") != null) {
                                     action = getConfig().getString("config.censorship." + key.toLowerCase() + ".action");
@@ -105,13 +189,13 @@ public class Censorship extends JavaPlugin implements Listener {
                             }
                             
                             List<Integer> positions = new ArrayList<Integer>();
-                            
-                            for (int i=0; i < token.length(); i++) {
+
+                            for (int i = 0; i < token.length(); i++) {
                                 if (Character.isUpperCase(token.charAt(i))) {
                                     positions.add(i);
                                 }
                             }
-                            
+
                             if (token.toLowerCase().contains(key.toLowerCase())) {
                                 token = token.toLowerCase().replaceAll(key.toLowerCase(), replaceWith.toLowerCase());
                             }
@@ -121,7 +205,7 @@ public class Censorship extends JavaPlugin implements Listener {
                                     Character.toUpperCase(token.charAt(i));
                                 }
                             }
-                            
+
                             actions.add(action);
                             actions.add("pp:" + pp);
                             actions.add("dmg:" + dmg);
@@ -145,6 +229,13 @@ public class Censorship extends JavaPlugin implements Listener {
                 if (action.startsWith("cmd:") && getConfig().getBoolean("config.command.enabled")) {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), action.replace("cmd:", ""));
                 }
+                if (getConfig().getBoolean("config.notify.enabled")) {
+                    for (Player player : getServer().getOnlinePlayers()) {
+                        if (player.isOp()) {
+                            player.sendMessage(event.getPlayer().getName() + " used forbidden word(s).");
+                        }
+                    }
+                }
                 if (action.startsWith("dmg:") && getConfig().getBoolean("config.damage.enabled")) {
                     event.getPlayer().setHealth(event.getPlayer().getHealth() - Integer.parseInt(action.replace("dmg:", "")));
                     event.getPlayer().sendMessage("You were damaged for using forbidden word(s).");
@@ -165,7 +256,6 @@ public class Censorship extends JavaPlugin implements Listener {
                     int points = Integer.parseInt(action.replace("pp:", ""));
                     points += getCustomConfig().getInt("players.censorship." + event.getPlayer().getName() + ".penalty-points");
 
-
                     if (points >= bp) {
                         if (getConfig().getBoolean("config.penalty-points.ban.enabled")) {
                             event.getPlayer().kickPlayer("You were banned, because of overusing forbidden words.");
@@ -175,10 +265,13 @@ public class Censorship extends JavaPlugin implements Listener {
 
                             return;
                         }
+                    } else {
+                        getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", points);
+                        saveCustomConfig();
                     }
 
                     if (getConfig().getBoolean("config.penalty-points.mute.enabled")) {
-                        if (points >= mp - 1) {
+                        if (points >= mp) {
                             getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", points);
                             setMute(event.getPlayer());
                             saveCustomConfig();
@@ -336,11 +429,11 @@ public class Censorship extends JavaPlugin implements Listener {
                         int points = Integer.parseInt(args[2]);
 
                         String path_p = "players.censorship." + target + ".penalty-points";
-                        Integer path_i = Integer.valueOf(getCustomConfig().getInt("players.censorship." + target + ".pentalty-points"));
+                        Integer path_i = getCustomConfig().getInt("players.censorship." + target + ".pentalty-points");
 
                         int out = path_i.intValue() + points;
 
-                        getConfig().set(path_p, Integer.valueOf(out));
+                        getConfig().set(path_p, out);
                         saveCustomConfig();
 
                         sender.sendMessage("Added '" + ChatColor.RED + path_i + ChatColor.WHITE + "' pentalty points to '" + ChatColor.GOLD + target + ChatColor.WHITE + "'.");
@@ -357,11 +450,11 @@ public class Censorship extends JavaPlugin implements Listener {
                         int points = Integer.parseInt(args[2]);
 
                         String path_p = "players.censorship." + target + ".penalty-points";
-                        Integer path_i = Integer.valueOf(getCustomConfig().getInt("players.censorship." + target + ".pentalty-points"));
+                        Integer path_i = getCustomConfig().getInt("players.censorship." + target + ".pentalty-points");
 
                         int out = path_i.intValue() - points;
 
-                        getConfig().set(path_p, Integer.valueOf(out));
+                        getConfig().set(path_p, out);
                         saveCustomConfig();
 
                         sender.sendMessage("Removed '" + ChatColor.RED + path_i + ChatColor.WHITE + "' pentalty points from '" + ChatColor.GOLD + target + ChatColor.WHITE + "'.");
@@ -404,14 +497,14 @@ public class Censorship extends JavaPlugin implements Listener {
         return false;
     }
 
-    private String replace(String source, String search) {
+    public static String replace(String source, String search) {
         List<String> words = new ArrayList<String>();
         StringTokenizer st = new StringTokenizer(source);
-        
-        while(st.hasMoreTokens()) {
+
+        while (st.hasMoreTokens()) {
             words.add(st.nextToken());
         }
-        
+
         int length = search.length();
         if (length < 2) {
             return source;
@@ -419,24 +512,15 @@ public class Censorship extends JavaPlugin implements Listener {
         StringBuilder sb = new StringBuilder(4 * length - 3);
         for (int i = 0; i < length - 1; i++) {
             sb.append(search.charAt(i));
-            sb.append("\\s*\\W*");
+            sb.append("\\s*");
+            sb.append("\\.*");
+            sb.append("\\,*");
+            sb.append("\\-*");
+            sb.append("\\_*");
         }
         sb.append(search.charAt(length - 1));
         
         source = source.toLowerCase().replaceAll(sb.toString().toLowerCase(), search.toLowerCase());
-        st = new StringTokenizer(source);
-        
-        while(st.hasMoreTokens()) {
-            String token = st.nextToken();
-            for (int i=0; i < words.size(); i++) {
-                if (words.get(i).toLowerCase().equals(token)) {
-                    source = source.replaceAll(token, words.get(i));
-                    words.remove(i);
-                    break;
-                }
-            }
-        }
-        
         return source;
     }
 
@@ -449,9 +533,6 @@ public class Censorship extends JavaPlugin implements Listener {
     }
 
     private void loadConfig() {
-
-        String[] list = {"example-word-to-replace-exception"};
-
         String comment = "Thank you for downloading this plugin. In the next lines are tips to add/edit words in the config.\n"
                 + "This is Version " + this.toString().replaceAll("CensorShip v", "") + "\n\n"
                 + "The \"example-word-to-replace\" cannot be removed! Sorry for that :/\n"
@@ -460,6 +541,8 @@ public class Censorship extends JavaPlugin implements Listener {
                 + "If you set the ban-option to true a player will get banned after getting given amount of penalty-points.\n"
                 + "If you set the mute-option to true a player will get muted for given time after getting given amount of penalty-points.\n"
                 + "If you set the command-option to true custom commands can be executed for using a forbidden word.\n\n"
+                + "Next there is the possibillity to set the notify-option to enabled. This automatically notices all operators if a player uses forbidden words."
+                + "Also you can use the autoupdate options. You are able to set checking true and you can set the automatically downloading of the newest version to true."
                 + "To add a word you can use the command \"/censor add <word> <replace-with> <action> [damage]\" or you can type it here.\n"
                 + "First of all you have to add the word that should be replaced. After that you choose a word or symbols to replace that word with.\n"
                 + "Now you can add a custom command like \"ban <player> <reason>\"(without slash!).\n"
@@ -476,19 +559,23 @@ public class Censorship extends JavaPlugin implements Listener {
                 + "      mcbans:\n"
                 + "        reason: '<player> used forbidden words in chat.'\n"
                 + "      penalty-points: 0\n"
-                + "      exception:\n"
+                + "      exceptions:\n"
                 + "      - Godship\n"
                 + "      - Godsons\n";
 
         getConfig().options().header(comment);
 
-        getConfig().addDefault("config.damage.enabled", Boolean.valueOf(false));
-        getConfig().addDefault("config.penalty-points.ban.enabled", Boolean.valueOf(true));
-        getConfig().addDefault("config.penalty-points.ban.points", Integer.valueOf(3));
-        getConfig().addDefault("config.penalty-points.mute.enabled", Boolean.valueOf(false));
-        getConfig().addDefault("config.penalty-points.mute.points", Integer.valueOf(3));
-        getConfig().addDefault("config.penalty-points.mute.seconds", Integer.valueOf(300));
-        getConfig().addDefault("config.command.enabled", Boolean.valueOf(false));
+        getConfig().addDefault("config.damage.enabled", false);
+        getConfig().addDefault("config.notify.enabled", false);
+        getConfig().addDefault("config.autoupdate.check", true);
+        getConfig().addDefault("config.autoupdate.download", false);
+        getConfig().addDefault("config.penalty-points.ban.enabled", false);
+        getConfig().addDefault("config.penalty-points.ban.points", 3);
+        getConfig().addDefault("config.penalty-points.mute.enabled", false);
+        getConfig().addDefault("config.penalty-points.mute.points", 3);
+        getConfig().addDefault("config.penalty-points.mute.seconds", 300);
+        getConfig().addDefault("config.command.enabled", false);
+        getConfig().addDefault("config.censorship", "");
 
         getConfig().options().copyDefaults(true);
 
@@ -501,15 +588,14 @@ public class Censorship extends JavaPlugin implements Listener {
         long seconds = 20 * sec;
         double minuites = 20 * sec / 1200;
 
-        getCustomConfig().set("players.censorship." + player.getName() + ".muted", Boolean.valueOf(true));
+        getCustomConfig().set("players.censorship." + player.getName() + ".muted", false);
         getServer().broadcastMessage(ChatColor.GOLD + player.getName() + ChatColor.WHITE + " is now muted for " + ChatColor.GOLD + minuites + " minuites" + ChatColor.WHITE + ".");
         saveConfig();
 
         Bukkit.getScheduler().scheduleAsyncDelayedTask(this, new Runnable() {
 
             public void run() {
-                getCustomConfig().set("players.censorship." + player.getName() + ".muted", Boolean.valueOf(false));
-                getCustomConfig().set("players.censorship." + player.getName() + ".penalty-points", Integer.valueOf(0));
+                getCustomConfig().set("players.censorship." + player.getName() + ".muted", false);
                 getServer().broadcastMessage(ChatColor.GOLD + player.getName() + ChatColor.WHITE + " is no longer muted.");
                 saveCustomConfig();
             }
