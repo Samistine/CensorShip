@@ -1,15 +1,9 @@
 package com.bw2801.plugins.censorship;
 
-import java.io.BufferedReader;
+import com.bw2801.plugins.censorship.Updater.UpdateResult;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -31,12 +25,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * @author Bw2801
- * @date 2012-11-19
- * @version 1.9.6
+ * @date 2012-11-20
+ * @version 1.9.8
  * 
- * @fixed error / spamming on using "?", "!", "." and ","
- * @added auto staff notification
- * @added auto updating
+ * @fixed setting everything to lower case
+ * @added multiple commands for each word
+ * @removed auto-updating
  */
 public class Censorship extends JavaPlugin implements Listener {
 
@@ -47,7 +41,7 @@ public class Censorship extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        checkVersion();
+        //checkVersion();
 
         loadConfig();
         loadPlayerConfig();
@@ -58,55 +52,18 @@ public class Censorship extends JavaPlugin implements Listener {
 
     public void checkVersion() {
         if (getConfig().getBoolean("config.autoupdate.check")) {
-            BufferedReader buffer = null;
-            try {
-                String webnames = "http://evergenstudios.6te.net/bw2801/censorship.php?p=cs";
-                URL url = new URL(webnames);
-                URLConnection urlc = url.openConnection();
-                buffer = new BufferedReader(new InputStreamReader(urlc.getInputStream(), "UTF8"));
-                String version = "";
-                String link = "";
-                String date = "";
-                for (int i = 0; i < 3; i++) {
-                    if (i == 0) {
-                        version = buffer.readLine();
-                    } else if (i == 1) {
-                        link = buffer.readLine();
-                    } else if (i == 2) {
-                        date = buffer.readLine();
-                    }
-                }
-
-                if (!version.equals(this.toString().replaceAll("CensorShip v", ""))) {
-                    System.out.println(
-                            "\n\u001B[33m=========CensorShip========="
-                            + "\n\u001B[33mLast updated: " + date
-                            + "\n\u001B[33mLatest Version: " + version
-                            + "\n\u001B[33mDownload: " + link
-                            + "\n\u001B[33m============================\u001B[37m");
-
-                    if (getConfig().getBoolean("config.autoupdate.download")) {
-                        System.out.println("[CensorShip] \u001B[33mDownloading latest version...\u001B[37m");
-                        URL website = new URL(link);
-                        ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-                        FileOutputStream fos = new FileOutputStream("plugins/CensorShip-dwnl-" + version + ".jar");
-                        fos.getChannel().transferFrom(rbc, 0, 1 << 24);
-                        System.out.println("[CensorShip] \u001B[32mLatest version downloaded. Please stop the server and remove the old version. Then restart.\u001B[37m");
-                    }
+            Updater check = new Updater(this, "censorship", this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
+            System.out.println("[CensorShip] New version available: " + check.getLatestVersionString());
+            
+            if (getConfig().getBoolean("config.autoupdate.download")) {
+                System.out.println("[CensorShip] Started downloading new version.");
+                Updater update = new Updater(this, "censorship", this.getFile(), Updater.UpdateType.DEFAULT, false);
+                
+                if (update.getResult() == UpdateResult.SUCCESS) {
+                    System.out.println("[CensorShip] Download successfully finished."); 
                 } else {
-                    System.out.println(
-                            "\n\u001B[32m=========CensorShip========="
-                            + "\n\u001B[32mYou are using the lastest"
-                            + "\n\u001B[32mVersion."
-                            + "\n\u001B[32m============================\u001B[37m");
+                    System.out.println("[CensorShip] Couldn't download latest version."); 
                 }
-
-                buffer.close();
-            } catch (Exception ex) {
-                System.out.println(
-                        "\n\u001B[31m=========CensorShip========="
-                        + "\n\u001B[31mCould not check Version."
-                        + "\n\u001B[31m============================\u001B[37m");
             }
         }
     }
@@ -139,7 +96,7 @@ public class Censorship extends JavaPlugin implements Listener {
             String result = msg;
             List<String> actions = new ArrayList<String>();
 
-            if (sec.getKeys(false) != null) {
+            if (sec != null) {
                 for (String search : sec.getKeys(false)) {
                     result = replace(result, search);
                 }
@@ -150,66 +107,70 @@ public class Censorship extends JavaPlugin implements Listener {
 
             while (st.hasMoreTokens()) {
                 String token = st.nextToken();
-                for (String key : sec.getKeys(false)) {
-                    boolean contains = false;
-                    for (String item : getConfig().getStringList("config.censorship." + key.toLowerCase() + ".exceptions")) {
-                        if (token.toLowerCase().contains(item.toLowerCase())) {
-                            contains = true;
+                if (sec != null) {
+                    for (String key : sec.getKeys(false)) {
+                        boolean contains = false;
+                        for (String item : getConfig().getStringList("config.censorship." + key.toLowerCase() + ".exceptions")) {
+                            if (token.toLowerCase().contains(item.toLowerCase())) {
+                                contains = true;
+                            }
                         }
-                    }
-                    if (!contains) {
-                        if (token.toLowerCase().contains(key.toLowerCase())) {
-                            String action = "none";
-                            String cmd = "";
-                            int pp = 1;
-                            String replaceWith = "";
-                            for (int i = 0; i < key.length(); i++) {
-                                replaceWith += "*";
-                            }
-                            String rs = "";
-                            int dmg = 0;
-
-                            try {
-                                if (getConfig().getString("config.censorship." + key.toLowerCase() + ".action") != null) {
-                                    action = getConfig().getString("config.censorship." + key.toLowerCase() + ".action");
-                                }
-                                if (getConfig().getString("config.censorship." + key.toLowerCase() + ".command") != null) {
-                                    cmd = getConfig().getString("config.censorship." + key.toLowerCase() + ".command");
-                                }
-                                if (getConfig().getString("config.censorship." + key.toLowerCase() + ".replace-with") != null) {
-                                    replaceWith = getConfig().getString("config.censorship." + key.toLowerCase() + ".replace-with");
-                                }
-                                if (getConfig().getString("config.censorship." + key.toLowerCase() + ".mcbans.reason") != null) {
-                                    rs = getConfig().getString("config.censorship." + key.toLowerCase() + ".mcbans.reason");
-                                }
-                                pp = getConfig().getInt("config.censorship." + key.toLowerCase() + ".penalty-points");
-                                dmg = getConfig().getInt("config.censorship." + key.toLowerCase() + ".damage");
-                            } catch (Exception e) {
-                                System.out.println("[CensorShip] Could not pass word and used default settings.");
-                            }
-                            
-                            List<Integer> positions = new ArrayList<Integer>();
-
-                            for (int i = 0; i < token.length(); i++) {
-                                if (Character.isUpperCase(token.charAt(i))) {
-                                    positions.add(i);
-                                }
-                            }
-
+                        if (!contains) {
                             if (token.toLowerCase().contains(key.toLowerCase())) {
-                                token = token.toLowerCase().replaceAll(key.toLowerCase(), replaceWith.toLowerCase());
-                            }
+                                String action = "none";
+                                List<String> cmd = new ArrayList<String>();
+                                int pp = 1;
+                                String replaceWith = "";
+                                for (int i = 0; i < key.length(); i++) {
+                                    replaceWith += "*";
+                                }
+                                String rs = "";
+                                int dmg = 0;
 
-                            for (int i : positions) {
-                                if (i < token.length()) {
-                                    Character.toUpperCase(token.charAt(i));
+                                try {
+                                    if (getConfig().getString("config.censorship." + key.toLowerCase() + ".action") != null) {
+                                        action = getConfig().getString("config.censorship." + key.toLowerCase() + ".action");
+                                    }
+                                    if (getConfig().getString("config.censorship." + key.toLowerCase() + ".command") != null) {
+                                        cmd = getConfig().getStringList("config.censorship." + key.toLowerCase() + ".command");
+                                    }
+                                    if (getConfig().getString("config.censorship." + key.toLowerCase() + ".replace-with") != null) {
+                                        replaceWith = getConfig().getString("config.censorship." + key.toLowerCase() + ".replace-with");
+                                    }
+                                    if (getConfig().getString("config.censorship." + key.toLowerCase() + ".mcbans.reason") != null) {
+                                        rs = getConfig().getString("config.censorship." + key.toLowerCase() + ".mcbans.reason");
+                                    }
+                                    pp = getConfig().getInt("config.censorship." + key.toLowerCase() + ".penalty-points");
+                                    dmg = getConfig().getInt("config.censorship." + key.toLowerCase() + ".damage");
+                                } catch (Exception e) {
+                                    System.out.println("[CensorShip] Could not pass word and used default settings.");
+                                }
+
+                                List<Integer> positions = new ArrayList<Integer>();
+
+                                for (int i = 0; i < token.length(); i++) {
+                                    if (Character.isUpperCase(token.charAt(i))) {
+                                        positions.add(i);
+                                    }
+                                }
+
+                                if (token.toLowerCase().contains(key.toLowerCase())) {
+                                    token = token.toLowerCase().replaceAll(key.toLowerCase(), replaceWith.toLowerCase());
+                                }
+
+                                for (int i : positions) {
+                                    if (i < token.length()) {
+                                        Character.toUpperCase(token.charAt(i));
+                                    }
+                                }
+
+                                actions.add(action);
+                                actions.add("pp:" + pp);
+                                actions.add("dmg:" + dmg);
+                                for (String command : cmd) {
+                                    actions.add("cmd:" + command.replaceAll("<player>", event.getPlayer().getName()).replaceAll("<target>", event.getPlayer().getName()).replaceAll("%player", event.getPlayer().getName()).replaceAll("%target", event.getPlayer().getName()).replaceAll("<reason>", rs).replaceAll("%reason", rs));
                                 }
                             }
-
-                            actions.add(action);
-                            actions.add("pp:" + pp);
-                            actions.add("dmg:" + dmg);
-                            actions.add("cmd:" + cmd.replaceAll("<player>", event.getPlayer().getName()).replaceAll("<target>", event.getPlayer().getName()).replaceAll("%player", event.getPlayer().getName()).replaceAll("%target", event.getPlayer().getName()).replaceAll("<reason>", rs).replaceAll("%reason", rs));
                         }
                     }
                 }
@@ -519,8 +480,8 @@ public class Censorship extends JavaPlugin implements Listener {
             sb.append("\\_*");
         }
         sb.append(search.charAt(length - 1));
-        
-        source = source.toLowerCase().replaceAll(sb.toString().toLowerCase(), search.toLowerCase());
+
+        source = source.replaceAll("(?i)" + sb.toString(), search);
         return source;
     }
 
@@ -555,7 +516,10 @@ public class Censorship extends JavaPlugin implements Listener {
                 + "    god:\n"
                 + "      replace-with: 'notch'\n"
                 + "      action: 'none'\n"
-                + "      command: 'say don't do this again <player>!'\n"
+                + "      commands:\n"
+                + "      - 'say don't do this again <player>!'\n"
+                + "      - 'any other command'\n"
+                + "      - '...'\n"
                 + "      mcbans:\n"
                 + "        reason: '<player> used forbidden words in chat.'\n"
                 + "      penalty-points: 0\n"

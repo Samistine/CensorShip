@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.bw2801.plugins.censorship</groupId>
     <artifactId>CensorShip</artifactId>
-    <version>1.9.6</version>
+    <version>1.9.8</version>
     <name>CensorShip</name>
     <repositories>
         <repository>
