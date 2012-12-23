@@ -1,6 +1,5 @@
 package com.bw2801.plugins.censorship;
 
-import com.bw2801.plugins.censorship.Updater.UpdateResult;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,17 +19,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * @author Bw2801
- * @date 2012-11-20
- * @version 1.9.8
+ * @date 2012-12-23
+ * @version 1.9.9
  * 
- * @fixed setting everything to lower case
- * @added multiple commands for each word
- * @removed auto-updating
+ * @added opportunity of checking other plugins commands
  */
 public class Censorship extends JavaPlugin implements Listener {
 
@@ -41,31 +39,11 @@ public class Censorship extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        //checkVersion();
-
         loadConfig();
         loadPlayerConfig();
 
         getServer().getPluginManager().registerEvents(this, this);
         System.out.println(this + " enabled!");
-    }
-
-    public void checkVersion() {
-        if (getConfig().getBoolean("config.autoupdate.check")) {
-            Updater check = new Updater(this, "censorship", this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
-            System.out.println("[CensorShip] New version available: " + check.getLatestVersionString());
-            
-            if (getConfig().getBoolean("config.autoupdate.download")) {
-                System.out.println("[CensorShip] Started downloading new version.");
-                Updater update = new Updater(this, "censorship", this.getFile(), Updater.UpdateType.DEFAULT, false);
-                
-                if (update.getResult() == UpdateResult.SUCCESS) {
-                    System.out.println("[CensorShip] Download successfully finished."); 
-                } else {
-                    System.out.println("[CensorShip] Couldn't download latest version."); 
-                }
-            }
-        }
     }
 
     public static FileConfiguration getConfiguration() {
@@ -76,6 +54,208 @@ public class Censorship extends JavaPlugin implements Listener {
     public static FileConfiguration getCustomConfiguration() {
         Censorship cs = new Censorship();
         return cs.getCustomConfig();
+    }
+
+    @EventHandler
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        if (!getConfig().getBoolean("config.check-commands.enabled")) {
+            return;
+        }
+        
+        String cmd = "";
+        String msg = "";
+        String rest = "";
+        int pos = -1;
+        
+        for (String command : getConfig().getStringList("config.check-commands.list")) {
+            msg = command;
+            String split[] = msg.split(" ");
+            if (event.getMessage().toLowerCase().startsWith(split[0].toLowerCase())) {
+                cmd = split[0];
+                String split2[] = event.getMessage().replaceFirst(cmd + " ", "").split(" ");
+                for (int i = 0; i < split2.length; i++) {
+                    rest += split2[i] + " ";
+                }
+                break;
+            }
+        }
+        
+        String split[] = msg.replaceFirst(cmd + " ", "").split(" ");
+        for (int i=0; i < split.length; i++) {
+            System.out.println(split[i]);
+            if (split[i].equals("<msg>")) {
+                pos = i;
+                break;
+            }
+        }
+        
+        if (pos != -1) {
+            String check = rest;
+            rest = "";
+            StringTokenizer st = new StringTokenizer(check);
+            String string = "";
+            int i = 0;
+            
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken();
+                if (i >= pos) {
+                    string += token + " ";
+                } else {
+                    rest += token + " ";
+                }
+                i++;
+            }
+            
+            ConfigurationSection sec = getConfig().getConfigurationSection("config.censorship");
+            String result = string;
+            List<String> actions = new ArrayList<String>();
+
+            if (sec != null) {
+                for (String search : sec.getKeys(false)) {
+                    result = replace(result, search);
+                }
+            }
+
+            StringTokenizer st2 = new StringTokenizer(result);
+            String string2 = "";
+
+            while (st2.hasMoreTokens()) {
+                String token = st2.nextToken();
+                if (sec != null) {
+                    for (String key : sec.getKeys(false)) {
+                        boolean contains = false;
+                        for (String item : getConfig().getStringList("config.censorship." + key.toLowerCase() + ".exceptions")) {
+                            if (token.toLowerCase().contains(item.toLowerCase())) {
+                                contains = true;
+                            }
+                        }
+                        if (!contains) {
+                            if (token.toLowerCase().contains(key.toLowerCase())) {
+                                String action = "none";
+                                List<String> cmd2 = new ArrayList<String>();
+                                int pp = 1;
+                                String replaceWith = "";
+                                for (int i2 = 0; i2 < key.length(); i2++) {
+                                    replaceWith += "*";
+                                }
+                                String rs = "";
+                                int dmg = 0;
+
+                                try {
+                                    if (getConfig().getString("config.censorship." + key.toLowerCase() + ".action") != null) {
+                                        action = getConfig().getString("config.censorship." + key.toLowerCase() + ".action");
+                                    }
+                                    if (getConfig().getString("config.censorship." + key.toLowerCase() + ".command") != null) {
+                                        cmd2 = getConfig().getStringList("config.censorship." + key.toLowerCase() + ".command");
+                                    }
+                                    if (getConfig().getString("config.censorship." + key.toLowerCase() + ".replace-with") != null) {
+                                        replaceWith = getConfig().getString("config.censorship." + key.toLowerCase() + ".replace-with");
+                                    }
+                                    if (getConfig().getString("config.censorship." + key.toLowerCase() + ".mcbans.reason") != null) {
+                                        rs = getConfig().getString("config.censorship." + key.toLowerCase() + ".mcbans.reason");
+                                    }
+                                    pp = getConfig().getInt("config.censorship." + key.toLowerCase() + ".penalty-points");
+                                    dmg = getConfig().getInt("config.censorship." + key.toLowerCase() + ".damage");
+                                } catch (Exception e) {
+                                    System.out.println("[CensorShip] Could not pass word and used default settings.");
+                                }
+
+                                List<Integer> positions = new ArrayList<Integer>();
+
+                                for (int i2 = 0; i2 < token.length(); i2++) {
+                                    if (Character.isUpperCase(token.charAt(i))) {
+                                        positions.add(i);
+                                    }
+                                }
+
+                                if (token.toLowerCase().contains(key.toLowerCase())) {
+                                    token = token.toLowerCase().replaceAll(key.toLowerCase(), replaceWith.toLowerCase());
+                                }
+
+                                for (int i2 : positions) {
+                                    if (i2 < token.length()) {
+                                        Character.toUpperCase(token.charAt(i));
+                                    }
+                                }
+
+                                actions.add(action);
+                                actions.add("pp:" + pp);
+                                actions.add("dmg:" + dmg);
+                                for (String command : cmd2) {
+                                    actions.add("cmd:" + command.replaceAll("<player>", event.getPlayer().getName()).replaceAll("<target>", event.getPlayer().getName()).replaceAll("%player", event.getPlayer().getName()).replaceAll("%target", event.getPlayer().getName()).replaceAll("<reason>", rs).replaceAll("%reason", rs));
+                                }
+                            }
+                        }
+                    }
+                }
+                string2 = string2 + token + " ";
+            }
+            
+            event.setMessage(cmd + " " + rest + string2);
+            System.out.println("Message: " + cmd + " " + rest + string2);
+            
+            if (event.getPlayer().hasPermission("censor.disallow")) {
+                return;
+            }
+
+            int mp = getConfig().getInt("config.penalty-points.mute.points");
+            int bp = getConfig().getInt("config.penalty-points.ban.points");
+
+            for (String action : actions) {
+                if (action.startsWith("cmd:") && getConfig().getBoolean("config.command.enabled")) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), action.replace("cmd:", ""));
+                }
+                if (getConfig().getBoolean("config.notify.enabled")) {
+                    for (Player player : getServer().getOnlinePlayers()) {
+                        if (player.isOp()) {
+                            player.sendMessage(event.getPlayer().getName() + " used forbidden word(s).");
+                        }
+                    }
+                }
+                if (action.startsWith("dmg:") && getConfig().getBoolean("config.damage.enabled")) {
+                    event.getPlayer().setHealth(event.getPlayer().getHealth() - Integer.parseInt(action.replace("dmg:", "")));
+                    event.getPlayer().sendMessage("You were damaged for using forbidden word(s).");
+                }
+                if (action.equals("ban")) {
+                    event.getPlayer().setBanned(true);
+                    event.getPlayer().kickPlayer("You were banned for using forbidden word(s) in chat.");
+                    getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was kicked for using forbidden word(s).");
+
+                    return;
+                } else if (action.equals("kick")) {
+                    event.getPlayer().kickPlayer("You were kicked for using forbidden word(s) in chat.");
+                    getServer().broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + ChatColor.WHITE + " was kicked for using forbidden word(s).");
+
+                    return;
+                }
+                if (action.startsWith("pp:")) {
+                    int points = Integer.parseInt(action.replace("pp:", ""));
+                    points += getCustomConfig().getInt("players.censorship." + event.getPlayer().getName() + ".penalty-points");
+
+                    if (points >= bp) {
+                        if (getConfig().getBoolean("config.penalty-points.ban.enabled")) {
+                            event.getPlayer().kickPlayer("You were banned, because of overusing forbidden words.");
+                            event.getPlayer().setBanned(true);
+                            getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", points);
+                            saveCustomConfig();
+
+                            return;
+                        }
+                    } else {
+                        getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", points);
+                        saveCustomConfig();
+                    }
+
+                    if (getConfig().getBoolean("config.penalty-points.mute.enabled")) {
+                        if (points >= mp) {
+                            getCustomConfig().set("players.censorship." + event.getPlayer().getName() + ".penalty-points", points);
+                            setMute(event.getPlayer());
+                            saveCustomConfig();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -478,6 +658,7 @@ public class Censorship extends JavaPlugin implements Listener {
             sb.append("\\,*");
             sb.append("\\-*");
             sb.append("\\_*");
+            sb.append("\\~*");
         }
         sb.append(search.charAt(length - 1));
 
@@ -525,10 +706,28 @@ public class Censorship extends JavaPlugin implements Listener {
                 + "      penalty-points: 0\n"
                 + "      exceptions:\n"
                 + "      - Godship\n"
-                + "      - Godsons\n";
+                + "      - Godsons\n\n"
+                + ""
+                + "I added something new in 1.9.9! There you can set the \"check-commands\"-option to true. That means that the plugin will catch the commands you put in the list\n"
+                + "And replaces the message in the plugin. To let this plugin know where it have to start to check you have to put a <msg>-tag at the place where the message normaly\n"
+                + "begins. You can do it like this:\n\n"
+                + "config:\n"
+                + "  ..."
+                + "  check-commands:\n"
+                + "    enabled: true\n"
+                + "    list:\n"
+                + "    - /msg <name> <msg>\n"
+                + "    - /r <msg>\n"
+                + "    - ...\n"
+                + "\n"
+                + "The <msg>-tag means that the plugin will check everything from there to the end of the input. The <name>-tag is just a placeholder and you can call it however you want.\n"
+                + "If there was a command formated like this: \"/cmdname <from> <to> <msg>\" you can change <from> and <to> to whatever you want like this:\n"
+                + "\"/cmdname <blub> <blah> <msg>\".";
 
         getConfig().options().header(comment);
 
+        String[] list = {"/msg <name> <msg>", "/r <msg>"};
+        
         getConfig().addDefault("config.damage.enabled", false);
         getConfig().addDefault("config.notify.enabled", false);
         getConfig().addDefault("config.autoupdate.check", true);
@@ -539,6 +738,8 @@ public class Censorship extends JavaPlugin implements Listener {
         getConfig().addDefault("config.penalty-points.mute.points", 3);
         getConfig().addDefault("config.penalty-points.mute.seconds", 300);
         getConfig().addDefault("config.command.enabled", false);
+        getConfig().addDefault("config.check-commands.enabled", false);
+        getConfig().addDefault("config.check-commands.list", list);
         getConfig().addDefault("config.censorship", "");
 
         getConfig().options().copyDefaults(true);
