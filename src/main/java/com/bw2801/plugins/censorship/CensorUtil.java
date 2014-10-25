@@ -3,15 +3,18 @@ package com.bw2801.plugins.censorship;
 import com.bw2801.plugins.censorship.actions.Action;
 import com.bw2801.plugins.censorship.actions.CensorAction;
 import com.bw2801.plugins.censorship.actions.ReplaceAction;
+import com.bw2801.plugins.censorship.replace.ReplaceUtil;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class CensorUtil {
+
+    private static final HashMap<String, ReplaceUtil> replaceUtils = new HashMap<>();
 
     public static class CensorResult {
 
@@ -37,7 +40,7 @@ public class CensorUtil {
         List<CensorAction> actions = new ArrayList<>();
 
         for (ReplaceAction action : replaceActions) {
-            result = replace(result, action.word);
+            result = replace(result, action.word, action.method);
         }
 
         StringTokenizer st = new StringTokenizer(result);
@@ -147,60 +150,15 @@ public class CensorUtil {
         }
     }
 
-    public static String replace(String source, String search) {
-        int length = search.length();
-        if (length < 2) {
-            return source;
-        }
+    public static String replace(String source, String search, String method) {
+        return replaceUtils.get(method).replace(source, search);
+    }
 
-        StringBuilder sb = new StringBuilder(4 * length - 3);
-        for (int i = 0; i < length - 1; i++) {
-            sb.append("([\\W\\d]*").append(Pattern.quote("" + search.charAt(i))).append(")+");
-        }
-        sb.append("([\\W\\d\\s]*)+");
-        sb.append(search.charAt(length - 1));
+    public static void addReplaceUtil(String name, ReplaceUtil util) {
+        replaceUtils.put(name, util);
+    }
 
-        String temp = source.replaceAll("(?i)" + sb.toString(), search).trim();
-        int wordCount = temp.split("\\s").length;
-
-        if (wordCount == 1 || wordCount == source.split("\\s").length) {
-            return temp;
-        } else {
-            System.out.println(temp);
-
-            sb = new StringBuilder(4 * length - 3);
-            sb.append("\\s+");
-
-            for (int i = 0; i < length - 1; i++) {
-                sb.append("([\\W\\d]*").append(Pattern.quote("" + search.charAt(i))).append(")+");
-            }
-            sb.append("([\\W\\d]*\\s)");
-            sb.append(search.charAt(length - 1));
-        }
-
-//        System.out.println(temp);
-//        System.out.println(temp.split("\\s").length);
-
-//        if (temp.split("\\s").length == 1 || temp.split("\\s").length == source.split("\\s").length) {
-//            return temp.trim();
-//        } else {
-//            sb = new StringBuilder(4 * length - 3);
-//            sb.append("\\s+");
-//
-//            for (int i = 0; i < length - 1; i++) {
-//                sb.append("([\\W\\d]*").append(Pattern.quote("" + search.charAt(i))).append(")+");
-//            }
-//            sb.append("([\\W\\d]*\\s)");
-//            sb.append(search.charAt(length - 1));
-//        }
-
-        String replace = source;
-
-        if (wordCount <= 2) {
-            replace = " " + source;
-        }
-
-        String result = replace.replaceAll("(?i)" + sb.toString(), search).trim();
-        return result;
+    public static Object[] getReplaceUtils() {
+        return replaceUtils.keySet().toArray();
     }
 }

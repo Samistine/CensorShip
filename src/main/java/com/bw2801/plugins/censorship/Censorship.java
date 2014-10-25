@@ -1,11 +1,15 @@
 package com.bw2801.plugins.censorship;
 
 import com.bw2801.plugins.censorship.actions.ReplaceActionManager;
+import com.bw2801.plugins.censorship.replace.AlternativeReplaceUtil;
+import com.bw2801.plugins.censorship.replace.CompactReplaceUtil;
+import com.bw2801.plugins.censorship.replace.DefaultReplaceUtil;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -23,25 +27,41 @@ public class Censorship extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        System.out.println(this + " disabled!");
+        print("Info", "Plugin enabled!");
     }
 
     @Override
     public void onEnable() {
-        Censorship.print("Info", "Loading censored words.");
+        initReplaceUtils();
+        loadWords();
+
+        print("Info", "Plugin disabled!");
+    }
+
+    private void initReplaceUtils() {
+        CensorUtil.addReplaceUtil("default", new DefaultReplaceUtil());
+        CensorUtil.addReplaceUtil("alternative", new AlternativeReplaceUtil());
+        CensorUtil.addReplaceUtil("compact", new CompactReplaceUtil());
+        Object[] utils = CensorUtil.getReplaceUtils();
+
+        print("Info", "Availiable replace methods (" + utils.length + "): " + Arrays.toString(utils));
+    }
+
+    private void loadWords() {
+        print("Info", "Loading censored words.");
 
         File config = new File("plugins/CensorShip/words-config.json");
         if (!config.exists()) {
-            Censorship.print("Warning", "Could not find \"words-config.json\".");
-            Censorship.print("Info", "Trying to create file...");
+            print("Warning", "Could not find \"words-config.json\".");
+            print("Info", "Trying to create file...");
             try {
                 config.createNewFile();
-                Censorship.print("Info", "File successfully created.");
+                print("Info", "File successfully created.");
             } catch (IOException ex) {
-                Censorship.print("Error", "File could not be created.");
+                print("Error", "File could not be created.");
             }
 
-            Censorship.print("Info", "Trying to write to file \"words-config.json\"...");
+            print("Info", "Trying to write to file \"words-config.json\"...");
 
             try {
                 try (FileWriter writer = new FileWriter(config)) {
@@ -53,9 +73,9 @@ public class Censorship extends JavaPlugin implements Listener {
                     writer.flush();
                 }
 
-                Censorship.print("Info", "Successfully written to file.");
+                print("Info", "Successfully written to file.");
             } catch (IOException e) {
-                Censorship.print("Error", "Could not write to file...");
+                print("Error", "Could not write to file...");
             }
 
             File s00 = new File("plugins/CensorShip/words00.json");
@@ -73,6 +93,7 @@ public class Censorship extends JavaPlugin implements Listener {
                                      + "			\"word\": \"asshole\",\n"
                                      + "			\"replace_with\": \"a******\",\n"
                                      + "			\"action\": \"none\",\n"
+                                     + "                        \"method\": \"default\",\n"
                                      + "\n"
                                      + "			\"exceptions\": [],\n"
                                      + "\n"
@@ -97,25 +118,23 @@ public class Censorship extends JavaPlugin implements Listener {
             for (Object obj : words) {
                 String word = (String) obj;
 
-                Censorship.print("Info", "Trying to read file \"" + word + ".json\"...");
+                print("Info", "Trying to read file \"" + word + ".json\"...");
                 try {
                     ReplaceActionManager.loadActions(new File("plugins/CensorShip/" + word + ".json").getPath());
                 } catch (Exception ex) {
-                    Censorship.print("Error", "Could not read file...");
+                    print("Error", "Could not read file...");
                 }
             }
         } catch (IOException | ParseException ex) {
         }
 
-        Censorship.print("Info", "Done parsing.");
+        print("Info", "Done parsing.");
 
         Config.init(this);
         Config.load();
 
         getCommand("censor").setExecutor(new CSCommandListener(this));
         getServer().getPluginManager().registerEvents(new ChatListener(), this);
-
-        System.out.println("[CensorShip] Info: Enabled!");
     }
 
     private FileConfiguration playerConfig = null;

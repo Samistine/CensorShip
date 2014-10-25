@@ -30,6 +30,7 @@ public class ReplaceActionManager {
                 String word = (String) sequence.get("word");
                 String replaceWith = (String) sequence.get("replace_with");
                 String action = (String) sequence.get("action");
+                String method = (String) sequence.get("method");
 
                 List<String> exceptions = new ArrayList<>();
                 for (Object exception : (JSONArray) sequence.get("exceptions")) {
@@ -41,8 +42,8 @@ public class ReplaceActionManager {
                     commands.add((String) command);
                 }
 
-                actions.add(new ReplaceAction(word, replaceWith, exceptions, commands, 0, 0, Action.valueOf(action.toUpperCase())));
-                System.out.println(new ReplaceAction(word, replaceWith, exceptions, commands, 0, 0, Action.valueOf(action.toUpperCase())));
+                actions.add(new ReplaceAction(word, replaceWith, method.toLowerCase(), exceptions, commands, 0, 0, Action.valueOf(action.toUpperCase())));
+                System.out.println(new ReplaceAction(word, replaceWith, method.toLowerCase(), exceptions, commands, 0, 0, Action.valueOf(action.toUpperCase())));
             }
         } catch (IOException | ParseException ex) {
             Censorship.print("Error", "Could not parse \"" + jsonFile + "\"!");

@@ -7,6 +7,8 @@ public class ReplaceAction {
     public final String word;
     public final String replace;
 
+    public final String method;
+
     public final int damage;
     public final int penaltyPoints;
 
@@ -15,7 +17,7 @@ public class ReplaceAction {
 
     public final Action action;
 
-    public ReplaceAction(String word, String replace, List<String> exceptions, List<String> commands, int damage, int penaltyPoints, Action action) {
+    public ReplaceAction(String word, String replace, String method, List<String> exceptions, List<String> commands, int damage, int penaltyPoints, Action action) {
         this.word = word;
         this.replace = replace;
         this.exceptions = exceptions;
@@ -23,10 +25,11 @@ public class ReplaceAction {
         this.penaltyPoints = penaltyPoints;
         this.commands = commands;
         this.action = action;
+        this.method = method;
     }
 
     @Override
     public String toString() {
-        return "ReplaceAction{" + "word=" + word + ", replace=" + replace + ", damage=" + damage + ", penaltyPoints=" + penaltyPoints + ", exceptions=" + exceptions + ", commands=" + commands + ", action=" + action + '}';
+        return "ReplaceAction{" + "word=" + word + ", replace=" + replace + ", method=" + method + ", damage=" + damage + ", penaltyPoints=" + penaltyPoints + ", exceptions=" + exceptions + ", commands=" + commands + ", action=" + action + '}';
     }
 }

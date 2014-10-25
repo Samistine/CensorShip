@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 public class CSCommandListener implements CommandExecutor {
 
-    private Censorship plugin;
+    private final Censorship plugin;
 
     public CSCommandListener(Censorship plugin) {
         this.plugin = plugin;
