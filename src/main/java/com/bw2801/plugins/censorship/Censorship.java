@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -34,6 +35,7 @@ public class Censorship extends JavaPlugin implements Listener {
     public void onEnable() {
         initReplaceUtils();
         loadWords();
+        startSchedule();
 
         print("Info", "Plugin disabled!");
     }
@@ -206,11 +208,15 @@ public class Censorship extends JavaPlugin implements Listener {
         }
     }
 
-    public void startMuteSchedule() {
+    private void startSchedule() {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 
             @Override
             public void run() {
+                for (String player : PlayerHandler.getTempBannedPlayers()) {
+                    PlayerHandler.decreaseTempBanTime(player, 1);
+                }
+
                 for (Player player : getServer().getOnlinePlayers()) {
                     if (PlayerHandler.isMuted(player.getName())) {
                         PlayerHandler.mutePlayer(player.getName(), PlayerHandler.getMuteTime(player.getName()));
@@ -219,8 +225,9 @@ public class Censorship extends JavaPlugin implements Listener {
                             if (Config.getMessage("messages.unmuted").length() == 0) {
                                 player.sendMessage(Config.getMessage("messages.unmuted"));
                             }
+
                             if (Config.getMessage("messages.unmuted-public").length() == 0) {
-                                Bukkit.broadcastMessage(Config.getMessage("messages.unmuted-public"));
+                                Bukkit.broadcastMessage(Config.getMessage("messages.unmuted-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
                             }
                         }
                     }

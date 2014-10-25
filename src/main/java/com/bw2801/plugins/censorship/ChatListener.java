@@ -3,23 +3,23 @@ package com.bw2801.plugins.censorship;
 import com.bw2801.plugins.censorship.CensorUtil.CensorResult;
 import com.bw2801.plugins.censorship.actions.ReplaceActionManager;
 import java.util.StringTokenizer;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 
 public class ChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-//        boolean muted = main.getConfig().getBoolean("players.censorship." + event.getPlayer() + ".muted");
-//
-//        if (muted == true) {
-//            main.setMute(event.getPlayer());
-//        }
+    public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
+        if (PlayerHandler.isTempBanned(event.getName())) {
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                           Config.getMessage("messages.tempbanned-login").replaceAll("<time>", ChatColor.RED + "" + PlayerHandler.getTempBanTime(event.getName()) + ChatColor.WHITE));
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -102,20 +102,12 @@ public class ChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-//        String msg = event.getMessage();
-//        boolean isMuted = false;
-//        try {
-//            isMuted = main.getCustomConfig().getBoolean("players.censorship." + event.getPlayer().getName() + ".muted", false);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        if (isMuted) {
-//            event.getPlayer().sendMessage(main.getMessageConfig().getString("messages.muted"));
-//            event.setCancelled(true);
-//        } else {
-//            event.setMessage(main.replace(msg, event.getPlayer()));
-//        }
+        if (PlayerHandler.isMuted(event.getPlayer().getName()) && !event.getPlayer().hasPermission("censor.bypass.actions")) {
+            event.getPlayer().sendMessage(Config.getMessage("messages.muted"));
+            event.setCancelled(true);
+
+            return;
+        }
 
         String msg = event.getMessage();
         CensorResult result = CensorUtil.censor(msg, ReplaceActionManager.getActions());

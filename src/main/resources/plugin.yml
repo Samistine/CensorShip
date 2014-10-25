@@ -5,7 +5,7 @@ generator: http://dinnerbone.com/minecraft/tools/pluginator/
 main: com.bw2801.plugins.censorship.Censorship
 name: CensorShip
 startup: postworld
-version: 2.3
+version: 3.0
 
 permissions:
   censor.*:

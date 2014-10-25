@@ -2,9 +2,7 @@ package com.bw2801.plugins.censorship;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 
 public class Config {
 
@@ -15,9 +13,13 @@ public class Config {
     private static boolean checkCommands = false;
     private static boolean muteEnabled = false;
     private static boolean banEnabled = false;
+    private static boolean tempBanEnabled = false;
 
     private static int mutePenaltyPoints = 3;
     private static int banPenaltyPoints = 3;
+    private static int tempBanPenaltyPoints = 3;
+
+    private static int tempBanTime = 86400;
     private static int muteTime = 300;
 
     private static Censorship plugin;
@@ -31,46 +33,42 @@ public class Config {
     private static void loadMessages() {
         FileConfiguration config = plugin.getMessageConfig();
         config.addDefault("messages.no-permission", "You don't have permissions to perform this command.");
-        config.addDefault("messages.damaged", "You were damaged for using forbidden word(s).");
-        config.addDefault("messages.banned", "You were banned for using forbidden word(s).");
-        config.addDefault("messages.banned-public", "<player> was banned for using forbidden word(s).");
-        config.addDefault("messages.kicked", "You were kicked for using forbidden word(s).");
-        config.addDefault("messages.kicked-public", "<player> was kicked for using forbidden word(s).");
+        config.addDefault("messages.damaged", "You were damaged for using forbidden words.");
+        config.addDefault("messages.banned", "You were banned for using forbidden words.");
+        config.addDefault("messages.banned-public", "<player> was banned for using forbidden words.");
+        config.addDefault("messages.tempbanned-login", "You are banned for the next <time> hours.");
+        config.addDefault("messages.tempbanned", "You were banned for <time> hours for using forbidden words.");
+        config.addDefault("messages.tempbanned-public", "<player> was banned for <time> hours for using forbidden words.");
+        config.addDefault("messages.kicked", "You were kicked for using forbidden words.");
+        config.addDefault("messages.kicked-public", "<player> was kicked for using forbidden words.");
         config.addDefault("messages.overused-banned", "You were banned for overusing forbidden words.");
+        config.addDefault("messages.overused-banned-public", "<player> was banned for overusing forbidden words.");
         config.addDefault("messages.muted", "You are muted! Nobody can hear you.");
-        config.addDefault("messages.muted-public", "<player> is muted now for <time> minutes.");
+        config.addDefault("messages.muted-public", "<player> is now muted for <time> minutes.");
         config.addDefault("messages.unmuted", "You are no longer muted.");
         config.addDefault("messages.unmuted-public", "<player> is no longer muted.");
         config.options().copyDefaults(true);
         plugin.saveMessageConfig();
     }
 
-    public static void mute(final Player player) {
-        int sec = plugin.getConfig().getInt("config.penalty-points.mute.seconds");
-        long seconds = 20 * sec;
-        double minuites = 20 * sec / 1200;
-
-        plugin.getPlayerConfig().set("players.censorship." + player.getName() + ".muted", false);
-        plugin.getServer().broadcastMessage(getMessage("muted-public").replace("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE).replace("<time>", ChatColor.GOLD + "" + minuites + ChatColor.WHITE));
-        plugin.saveConfig();
-
-        plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable() {
-
-            @Override
-            public void run() {
-                plugin.getPlayerConfig().set("players.censorship." + player.getName() + ".muted", false);
-                plugin.getServer().broadcastMessage(getMessage("unmuted-public").replace("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
-                plugin.savePlayerConfig();
-            }
-        }, seconds);
-    }
-
     private static void loadPlayerConfig() {
-        String players = "players.censorship";
+        String players = "players";
         plugin.getPlayerConfig().addDefault(players, null);
 
         plugin.getPlayerConfig().options().copyDefaults(true);
         plugin.savePlayerConfig();
+
+        for (Object key : plugin.getPlayerConfig().getConfigurationSection("players").getKeys(false)) {
+            String player = key.toString();
+
+            int time = plugin.getPlayerConfig().getInt("players." + player + ".mute-time", 0);
+            if (time > 0) {
+                PlayerHandler.mutePlayer(player, time);
+            }
+
+            PlayerHandler.setPenaltyPoints(player, plugin.getPlayerConfig().getInt("players." + player + ".penalty-points", 0));
+            PlayerHandler.tempBanPlayer(player, plugin.getPlayerConfig().getInt("players." + player + ".ban-time", 0));
+        }
     }
 
     public static String getMessage(String name) {
@@ -145,6 +143,30 @@ public class Config {
         Config.banEnabled = banEnabled;
     }
 
+    public static boolean isTempBanEnabled() {
+        return tempBanEnabled;
+    }
+
+    public static void setTempBanEnabled(boolean tempBanEnabled) {
+        Config.tempBanEnabled = tempBanEnabled;
+    }
+
+    public static int getTempBanPenaltyPoints() {
+        return tempBanPenaltyPoints;
+    }
+
+    public static void setTempBanPenaltyPoints(int tempBanPenaltyPoints) {
+        Config.tempBanPenaltyPoints = tempBanPenaltyPoints;
+    }
+
+    public static int getTempBanTime() {
+        return tempBanTime;
+    }
+
+    public static void setTempBanTime(int tempBanTime) {
+        Config.tempBanTime = tempBanTime;
+    }
+
     public static void setMutePenaltyPoints(int mutePenaltyPoints) {
         Config.mutePenaltyPoints = mutePenaltyPoints;
     }
@@ -195,6 +217,9 @@ public class Config {
         plugin.getConfig().addDefault("config.signs.enabled", true);
         plugin.getConfig().addDefault("config.penalty-points.ban.enabled", false);
         plugin.getConfig().addDefault("config.penalty-points.ban.points", 3);
+        plugin.getConfig().addDefault("config.penalty-points.tempban.enabled", false);
+        plugin.getConfig().addDefault("config.penalty-points.tempban.points", 3);
+        plugin.getConfig().addDefault("config.penalty-points.tempban.time", 86400);
         plugin.getConfig().addDefault("config.penalty-points.mute.enabled", false);
         plugin.getConfig().addDefault("config.penalty-points.mute.points", 3);
         plugin.getConfig().addDefault("config.penalty-points.mute.seconds", 300);
@@ -213,6 +238,10 @@ public class Config {
 
         banEnabled = plugin.getConfig().getBoolean("config.penalty-points.ban.enabled", false);
         banPenaltyPoints = plugin.getConfig().getInt("config.penalty-points.ban.points", 3);
+
+        tempBanEnabled = plugin.getConfig().getBoolean("config.penalty-points.tempban.enabled", false);
+        tempBanPenaltyPoints = plugin.getConfig().getInt("config.penalty-points.tempban.points", 3);
+        tempBanTime = plugin.getConfig().getInt("config.penalty-points.tempban.time", 86400);
 
         muteEnabled = plugin.getConfig().getBoolean("config.penalty-points.mute.enabled", false);
         mutePenaltyPoints = plugin.getConfig().getInt("config.penalty-points.mute.points", 3);
@@ -234,6 +263,10 @@ public class Config {
         plugin.getConfig().set("config.penalty-points.ban.enabled", banEnabled);
         plugin.getConfig().set("config.penalty-points.ban.points", banPenaltyPoints);
 
+        plugin.getConfig().set("config.penalty-points.tempban.enabled", tempBanEnabled);
+        plugin.getConfig().set("config.penalty-points.tempban.points", tempBanPenaltyPoints);
+        plugin.getConfig().set("config.penalty-points.tempban.time", tempBanTime);
+
         plugin.getConfig().set("config.penalty-points.mute.enabled", muteEnabled);
         plugin.getConfig().set("config.penalty-points.mute.points", mutePenaltyPoints);
         plugin.getConfig().set("config.penalty-points.mute.seconds", muteTime);
@@ -247,7 +280,16 @@ public class Config {
         plugin.saveMessageConfig();
         plugin.reloadMessageConfig();
 
+        savePlayers();
         plugin.savePlayerConfig();
         plugin.reloadPlayerConfig();
+    }
+
+    private static void savePlayers() {
+        for (String player : PlayerHandler.getPlayers()) {
+            plugin.getPlayerConfig().set("players." + player + ".mute-time", PlayerHandler.getMuteTime(player));
+            plugin.getPlayerConfig().set("players." + player + ".penalty-points", PlayerHandler.getPenaltyPoints(player));
+            plugin.getPlayerConfig().set("players." + player + ".ban-time", PlayerHandler.getTempBanTime(player));
+        }
     }
 }
