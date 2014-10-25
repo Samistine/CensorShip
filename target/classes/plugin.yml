@@ -5,21 +5,29 @@ generator: http://dinnerbone.com/minecraft/tools/pluginator/
 main: com.bw2801.plugins.censorship.Censorship
 name: CensorShip
 startup: postworld
-version: 2.2
+version: 2.3
 
 permissions:
   censor.*:
     description: Gives access to all CensorShip commands.
     children:
-      censor.bypass: true
+      censor.bypass.*: true
       censor.add: true
       censor.reload: true
       censor.remove: true
       censor.update: true
       censor.penalty-points.add: true
       censor.penalty-points.remove: true
-  censor.bypass:
-    description: disallows to get kicked or banned for using forbidden words.
+  censor.bypass.*:
+    description: Bypasses both, censoring and banning/kicking/muting
+    children:
+      censor.bypass.censor: true
+      censpr.bypass.actions: true
+  censor.bypass.censor:
+    description: disables censoring for this player
+    default: op
+  censor.bypass.actions:
+    description: disallows to get kicked, muted or banned for using forbidden words.
     default: op
   censor.add:
     description: allows to add forbidden words.
@@ -39,7 +47,7 @@ permissions:
   censor.penalty-points.remove:
     description: allows to remove penalty points to given player.
     default: op
-    
+
 commands:
   censor:
     description: adds/removes forbidden words.
