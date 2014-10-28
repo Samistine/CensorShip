@@ -97,8 +97,8 @@ public class CensorUtil {
 
         if (Config.isNotifyEnabled()) {
             for (Player op : Bukkit.getOnlinePlayers()) {
-                if (op.isOp()) {
-                    op.sendMessage(player.getName() + " used forbidden words.");
+                if (op.isOp() && Config.getMessage("notify").length() != 0) {
+                    op.sendMessage(Config.getMessage("notify").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
                 }
             }
         }
@@ -113,55 +113,73 @@ public class CensorUtil {
                     player.setHealth(0);
                 }
 
-                if (damage != 0) {
-                    player.sendMessage(Config.getMessage("messages.damaged"));
+                if (damage != 0 && Config.getMessage("damaged").length() != 0) {
+                    Censorship.sendMessage(player, Config.getMessage("damaged"));
                 }
             }
 
             PlayerHandler.addPenaltyPoints(player.getName(), action.penaltyPoints);
 
             if (action.action == Action.BAN) {
-                player.kickPlayer(Config.getMessage("messages.banned"));
-                Bukkit.broadcastMessage(Config.getMessage("messages.banned-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                player.kickPlayer(Config.getMessage("banned"));
+
+                if (Config.getMessage("banned-public").length() != 0) {
+                    Bukkit.broadcastMessage(Config.getMessage("banned-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                }
                 player.setBanned(true);
             } else if (action.action == Action.KICK) {
-                player.kickPlayer(Config.getMessage("message.kicked"));
-                Bukkit.broadcastMessage(Config.getMessage("messages.kicked-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                player.kickPlayer(Config.getMessage("kicked"));
+
+                if (Config.getMessage("kicked-public").length() != 0) {
+                    Bukkit.broadcastMessage(Config.getMessage("kicked-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                }
             } else if (action.action == Action.TEMPBAN) {
                 PlayerHandler.tempBanPlayer(player.getName(), Config.getTempBanTime());
-                player.kickPlayer(Config.getMessage("messages.tempbanned").replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60 / 60) + ChatColor.WHITE));
-                Bukkit.broadcastMessage(Config.getMessage("messages.tempbanned-public")
-                        .replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60 / 60) + ChatColor.WHITE).replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                player.kickPlayer(Config.getMessage("tempbanned").replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE));
+
+                if (Config.getMessage("tempbanned-public").length() != 0) {
+                    Bukkit.broadcastMessage(Config.getMessage("tempbanned-public")
+                            .replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE).replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                }
             }
 
             if (Config.isTempBanEnabled()) {
                 if (PlayerHandler.getPenaltyPoints(player.getName()) >= Config.getTempBanPenaltyPoints()) {
                     PlayerHandler.tempBanPlayer(player.getName(), Config.getTempBanTime());
-                    player.kickPlayer(Config.getMessage("messages.tempbanned").replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60 / 60) + ChatColor.WHITE));
-                    Bukkit.broadcastMessage(Config.getMessage("messages.tempbanned-public")
-                            .replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60 / 60) + ChatColor.WHITE).replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                    player.kickPlayer(Config.getMessage("tempbanned").replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE));
+
+                    if (Config.getMessage("tempbanned-public").length() != 0) {
+                        Bukkit.broadcastMessage(Config.getMessage("tempbanned-public")
+                                .replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE).replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                    }
                 }
             }
 
             if (Config.isBanEnabled()) {
                 if (PlayerHandler.getPenaltyPoints(player.getName()) >= Config.getBanPenaltyPoints()) {
-                    player.kickPlayer(Config.getMessage("messages.overused-banned"));
-                    Bukkit.broadcastMessage(Config.getMessage("messages.overused-banned-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                    player.kickPlayer(Config.getMessage("overused-banned"));
+
+                    if (Config.getMessage("overused-banned-public").length() != 0) {
+                        Bukkit.broadcastMessage(Config.getMessage("overused-banned-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                    }
+
                     player.setBanned(true);
                 }
             }
 
             if (Config.isMuteEnabled()) {
                 if (PlayerHandler.getPenaltyPoints(player.getName()) >= Config.getMutePenaltyPoints()) {
-                    player.sendMessage(Config.getMessage("messages.muted"));
-                    Bukkit.broadcastMessage(Config.getMessage("messages.muted-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                    if (Config.getMessage("muted-public").length() != 0) {
+                        Bukkit.broadcastMessage(Config.getMessage("muted-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE).replaceAll("<time>", ChatColor.RED + "" + Config.getMuteTime() / 60 + ChatColor.WHITE));
+                    }
+
                     PlayerHandler.mutePlayer(player.getName(), Config.getMuteTime());
                 }
             }
 
             if (Config.isCommandsEnabled()) {
                 for (String command : action.commands) {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replaceAll("<player>", player.getName()));
                 }
             }
         }

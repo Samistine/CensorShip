@@ -20,4 +20,9 @@ public class CensorAction {
         this.damage = damage;
         this.action = action;
     }
+
+    @Override
+    public String toString() {
+        return "CensorAction{" + "word=" + word + ", commands=" + commands + ", penaltyPoints=" + penaltyPoints + ", damage=" + damage + ", action=" + action + '}';
+    }
 }

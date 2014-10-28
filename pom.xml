@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.bw2801.plugins.censorship</groupId>
     <artifactId>CensorShip</artifactId>
-    <version>2.3</version>
+    <version>3.0</version>
     <name>CensorShip</name>
     <repositories>
         <repository>
@@ -21,13 +21,40 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.google.code.gson:gson</include>
+                                </includes>
+                            </artifactSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.6.2-R0.1-SNAPSHOT</version>
+            <version>1.7.9-R0.2</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

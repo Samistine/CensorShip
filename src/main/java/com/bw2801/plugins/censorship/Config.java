@@ -2,6 +2,7 @@ package com.bw2801.plugins.censorship;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class Config {
@@ -14,6 +15,9 @@ public class Config {
     private static boolean muteEnabled = false;
     private static boolean banEnabled = false;
     private static boolean tempBanEnabled = false;
+
+    private static String wordSaveFile = "words.json";
+    private static int autoSaveWordsInteval = 0;
 
     private static int mutePenaltyPoints = 3;
     private static int banPenaltyPoints = 3;
@@ -30,15 +34,31 @@ public class Config {
         plugin = main;
     }
 
+    public static int getAutoSaveWordsInteval() {
+        return autoSaveWordsInteval;
+    }
+
+    public static void setAutoSaveWordsInteval(int autoSaveWordsInteval) {
+        Config.autoSaveWordsInteval = autoSaveWordsInteval;
+    }
+
+    public static void setWordSaveFile(String save) {
+        wordSaveFile = save;
+    }
+
+    public static String getWordSaveFile() {
+        return wordSaveFile;
+    }
+
     private static void loadMessages() {
         FileConfiguration config = plugin.getMessageConfig();
         config.addDefault("messages.no-permission", "You don't have permissions to perform this command.");
         config.addDefault("messages.damaged", "You were damaged for using forbidden words.");
         config.addDefault("messages.banned", "You were banned for using forbidden words.");
         config.addDefault("messages.banned-public", "<player> was banned for using forbidden words.");
-        config.addDefault("messages.tempbanned-login", "You are banned for the next <time> hours.");
-        config.addDefault("messages.tempbanned", "You were banned for <time> hours for using forbidden words.");
-        config.addDefault("messages.tempbanned-public", "<player> was banned for <time> hours for using forbidden words.");
+        config.addDefault("messages.tempbanned-login", "You are banned for the next <time> minutes.");
+        config.addDefault("messages.tempbanned", "You were banned for <time> minutes for using forbidden words.");
+        config.addDefault("messages.tempbanned-public", "<player> was banned for <time> minutes for using forbidden words.");
         config.addDefault("messages.kicked", "You were kicked for using forbidden words.");
         config.addDefault("messages.kicked-public", "<player> was kicked for using forbidden words.");
         config.addDefault("messages.overused-banned", "You were banned for overusing forbidden words.");
@@ -47,6 +67,7 @@ public class Config {
         config.addDefault("messages.muted-public", "<player> is now muted for <time> minutes.");
         config.addDefault("messages.unmuted", "You are no longer muted.");
         config.addDefault("messages.unmuted-public", "<player> is no longer muted.");
+        config.addDefault("messages.notify", "<player> used forbidden words.");
         config.options().copyDefaults(true);
         plugin.saveMessageConfig();
     }
@@ -58,7 +79,11 @@ public class Config {
         plugin.getPlayerConfig().options().copyDefaults(true);
         plugin.savePlayerConfig();
 
-        for (Object key : plugin.getPlayerConfig().getConfigurationSection("players").getKeys(false)) {
+        ConfigurationSection sec = plugin.getPlayerConfig().getConfigurationSection("players");
+
+        if (sec == null) return;
+
+        for (Object key : sec.getKeys(false)) {
             String player = key.toString();
 
             int time = plugin.getPlayerConfig().getInt("players." + player + ".mute-time", 0);
@@ -193,39 +218,20 @@ public class Config {
     }
 
     public static void load() {
-        String s = "First of all: thank you for downloading this plugin. Here you can find some information on how to edit this configuration file.\n\n"
-                   + "The first things to modify are \"damage\", \"command\" and \"penalty-points\".\n"
-                   + "If you enable \"damage\", the payer wil get hurt for using forbidden words.\n"
-                   + "If you enable \"penalty-poitns: ban\", the player will get banned as soon as he reaches the given amount of penalty-points.\n"
-                   + "If you enable \"penalty-points: mute\", the player will get muted as soon as he reaches the given amount of penalty-points for the given amount of seconds.\n"
-                   + "If you enable \"command\", custom commands can be executed for using forbidden words.\n\n"
-                   + "The next option to set is the \"notify\" one.\n"
-                   + "If enabled, the plugin automatically notices all operators if a player uses forbidden words. "
-                   + "To add a word you can use the command \"/censor add <word> <replace-with> <action> [penalty-points] [damage]\" or you can check out the \"words.json\" file.\n\n"
-                   + "There are two options left now: \"signs\" and \"check-commands\".\n"
-                   + "If you enable \"check-commands\", the plugin will also check the commands defined in the \"check-commands\"-section, that are executed by the player and replace forbidden words. "
-                   + "To define a command you have to put the <msg>-tag where the message starts inside the command. This tag tells the plugin to check everything from there on to the end of the players input.\n"
-                   + "So you can for example do something like this: \"/msg <name> <msg>\". "
-                   + "In this case, the <name>-tag is just a placeholder and can be named whatever you want, so you can also name it <blah>, for example.\n\n"
-                   + "If you enable \"signs\", the plugin will also check sign text.";
-        plugin.getConfig().options().header(s);
-
-        String[] list = {"/msg <name> <msg>", "/r <msg>"};
-
         plugin.getConfig().addDefault("config.damage.enabled", false);
         plugin.getConfig().addDefault("config.notify.enabled", false);
         plugin.getConfig().addDefault("config.signs.enabled", true);
         plugin.getConfig().addDefault("config.penalty-points.ban.enabled", false);
-        plugin.getConfig().addDefault("config.penalty-points.ban.points", 3);
+        plugin.getConfig().addDefault("config.penalty-points.ban.points", 10);
         plugin.getConfig().addDefault("config.penalty-points.tempban.enabled", false);
-        plugin.getConfig().addDefault("config.penalty-points.tempban.points", 3);
+        plugin.getConfig().addDefault("config.penalty-points.tempban.points", 7);
         plugin.getConfig().addDefault("config.penalty-points.tempban.time", 86400);
         plugin.getConfig().addDefault("config.penalty-points.mute.enabled", false);
         plugin.getConfig().addDefault("config.penalty-points.mute.points", 3);
         plugin.getConfig().addDefault("config.penalty-points.mute.seconds", 300);
         plugin.getConfig().addDefault("config.commands.enabled", false);
         plugin.getConfig().addDefault("config.check-commands.enabled", false);
-        plugin.getConfig().addDefault("config.check-commands.list", list);
+        plugin.getConfig().addDefault("config.check-commands.list", new ArrayList<String>());
         plugin.getConfig().options().copyDefaults(true);
 
         plugin.saveConfig();

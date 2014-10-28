@@ -18,7 +18,7 @@ public class ChatListener implements Listener {
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
         if (PlayerHandler.isTempBanned(event.getName())) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                           Config.getMessage("messages.tempbanned-login").replaceAll("<time>", ChatColor.RED + "" + PlayerHandler.getTempBanTime(event.getName()) + ChatColor.WHITE));
+            Config.getMessage("tempbanned-login").replaceAll("<time>", ChatColor.RED + "" + PlayerHandler.getTempBanTime(event.getName()) / 60 + ChatColor.WHITE));
         }
     }
 
@@ -103,9 +103,11 @@ public class ChatListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         if (PlayerHandler.isMuted(event.getPlayer().getName()) && !event.getPlayer().hasPermission("censor.bypass.actions")) {
-            event.getPlayer().sendMessage(Config.getMessage("messages.muted"));
-            event.setCancelled(true);
+            if (Config.getMessage("muted").length() != 0) {
+                Censorship.sendMessage(event.getPlayer(), Config.getMessage("muted"));
+            }
 
+            event.setCancelled(true);
             return;
         }
 

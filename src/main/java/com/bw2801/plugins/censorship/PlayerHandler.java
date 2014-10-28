@@ -32,17 +32,11 @@ public class PlayerHandler {
     }
 
     public static void addPenaltyPoints(String player, int points) {
-        if (!penaltyPoints.containsKey(player)) {
-            penaltyPoints.put(player, 0);
-        }
-        penaltyPoints.put(player, penaltyPoints.get(player) + points);
+        penaltyPoints.put(player, getPenaltyPoints(player) + points);
     }
 
     public static void removePenaltyPoints(String player, int points) {
-        if (!penaltyPoints.containsKey(player)) {
-            penaltyPoints.put(player, 0);
-        }
-        penaltyPoints.put(player, penaltyPoints.get(player) - points);
+        penaltyPoints.put(player, getPenaltyPoints(player) - points);
     }
 
     public static void mutePlayer(String player, int seconds) {
@@ -69,8 +63,18 @@ public class PlayerHandler {
 
     public static Set<String> getPlayers() {
         Set<String> players = penaltyPoints.keySet();
-        players.addAll(muteTime.keySet());
-        players.addAll(banTime.keySet());
+
+        for (String player : muteTime.keySet()) {
+            if (!players.contains(player)) {
+                players.add(player);
+            }
+        }
+
+        for (String player : banTime.keySet()) {
+            if (!players.contains(player)) {
+                players.add(player);
+            }
+        }
 
         return players;
     }

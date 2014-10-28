@@ -24,8 +24,6 @@ public class DefaultReplaceUtil implements ReplaceUtil {
         if (wordCount == 1 || wordCount == source.split("\\s").length) {
             return temp;
         } else {
-            System.out.println(temp);
-
             sb = new StringBuilder(4 * length - 3);
             sb.append("\\s+");
 

@@ -14,10 +14,13 @@ permissions:
       censor.bypass.*: true
       censor.add: true
       censor.reload: true
+      censor.help: true
       censor.remove: true
       censor.update: true
       censor.penalty-points.add: true
       censor.penalty-points.remove: true
+      censor.penalty-points.get: true
+    default: op
   censor.bypass.*:
     description: Bypasses both, censoring and banning/kicking/muting
     children:
@@ -46,6 +49,12 @@ permissions:
     default: op
   censor.penalty-points.remove:
     description: allows to remove penalty points to given player.
+    default: op
+  censor.penalty-points.get:
+    description: allows to get the penalty points of given player.
+    default: op
+  censor.help:
+    description: allows to access the help
     default: op
 
 commands:
