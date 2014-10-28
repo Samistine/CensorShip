@@ -193,7 +193,7 @@ public class CensorUtil {
         replaceUtils.put(name, util);
     }
 
-    public static Object[] getReplaceUtils() {
-        return replaceUtils.keySet().toArray();
+    public static Set<String> getReplaceUtils() {
+        return replaceUtils.keySet();
     }
 }

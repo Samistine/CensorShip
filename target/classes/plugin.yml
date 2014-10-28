@@ -20,6 +20,7 @@ permissions:
       censor.penalty-points.add: true
       censor.penalty-points.remove: true
       censor.penalty-points.get: true
+      censor.test: true
     default: op
   censor.bypass.*:
     description: Bypasses both, censoring and banning/kicking/muting
@@ -54,7 +55,10 @@ permissions:
     description: allows to get the penalty points of given player.
     default: op
   censor.help:
-    description: allows to access the help
+    description: allows to access the help.
+    default: op
+  censor.test:
+    description: allows to test a method to censor.
     default: op
 
 commands:

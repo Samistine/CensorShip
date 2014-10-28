@@ -13,6 +13,7 @@ public class CSCommandListener implements CommandExecutor {
     private final ReloadCommand reload = new ReloadCommand();
     private final AddCommand add = new AddCommand();
     private final RemoveCommand remove = new RemoveCommand();
+    private final TestCommand test = new TestCommand();
 
     public CSCommandListener(Censorship plugin) {
         this.plugin = plugin;
@@ -24,6 +25,7 @@ public class CSCommandListener implements CommandExecutor {
         if (reload.onCommand(sender, cmd, label, args)) return true;
         if (add.onCommand(sender, cmd, label, args)) return true;
         if (remove.onCommand(sender, cmd, label, args)) return true;
+        if (test.onCommand(sender, cmd, label, args)) return true;
 
         help.showHelp(sender);
         return false;

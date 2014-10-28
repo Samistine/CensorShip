@@ -60,6 +60,7 @@ public class HelpCommand implements CommandExecutor {
         cs.sendMessage(ChatColor.GOLD + "/censor" + ChatColor.GRAY + " | Shows a list of all commands.");
         cs.sendMessage(ChatColor.GOLD + "/censor help" + ChatColor.GRAY + " | Shows a list of all commands.");
         cs.sendMessage(ChatColor.GOLD + "/censor reload" + ChatColor.GRAY + " | Reloads the config and words.");
+        cs.sendMessage(ChatColor.GOLD + "/censor test <method> <word> <message>" + ChatColor.GRAY + " | Executes a method to censor on the given word.");
         cs.sendMessage(ChatColor.GOLD + "/censor add <word> ..." + ChatColor.GRAY + " | Adds a word (" + ChatColor.GOLD + "/censor help add" + ChatColor.GRAY + ")");
         cs.sendMessage(ChatColor.GOLD + "/censor add exception ..." + ChatColor.GRAY + " | Adds an exception (" + ChatColor.GOLD + "/censor help add" + ChatColor.GRAY + ")");
         cs.sendMessage(ChatColor.GOLD + "/censor remove <word> ..." + ChatColor.GRAY + " | Removes a word (" + ChatColor.GOLD + "/censor help remove" + ChatColor.GRAY + ")");

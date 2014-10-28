@@ -73,9 +73,9 @@ public class Censorship extends JavaPlugin implements Listener {
         CensorUtil.addReplaceUtil("default", new DefaultReplaceUtil());
         CensorUtil.addReplaceUtil("alternative", new AlternativeReplaceUtil());
         CensorUtil.addReplaceUtil("compact", new CompactReplaceUtil());
-        Object[] utils = CensorUtil.getReplaceUtils();
+        Set<String> utils = CensorUtil.getReplaceUtils();
 
-        print("Info", "Availiable replace methods (" + utils.length + "): " + Arrays.toString(utils));
+        print("Info", "Availiable replace methods (" + utils.size() + "): " + Arrays.toString(utils.toArray()));
     }
 
     private static void loadWords() {
