@@ -12,15 +12,12 @@ permissions:
     description: Gives access to all CensorShip commands.
     children:
       censor.bypass.*: true
-      censor.add: true
+      censor.modify: true
       censor.reload: true
       censor.help: true
-      censor.remove: true
-      censor.update: true
-      censor.penalty-points.add: true
-      censor.penalty-points.remove: true
-      censor.penalty-points.get: true
-      censor.test: true
+      censor.penalty-points.*: true
+      censor.clear: true
+      censor.list: true
     default: op
   censor.modify:
     description: allows to add/remove/update words
@@ -37,6 +34,9 @@ permissions:
     children:
       censor.bypass.censor: true
       censpr.bypass.actions: true
+  censor.clear:
+    description: allows to remove effects from a player (mute/tempban)
+    default: op
   censor.bypass.censor:
     description: disables censoring for this player
     default: op
@@ -59,7 +59,7 @@ permissions:
     description: allows to update forbidden words.
     default: op
   censor.penalty-points.*:
-    description: allows to add/remove/get penalty points
+    description: allows to add/remove/get penalty points.
     default: op
     children:
       censor.penalty-points.add: true
@@ -79,6 +79,9 @@ permissions:
     default: op
   censor.test:
     description: allows to test a method to censor.
+    default: op
+  censor.list:
+    description: allows to list all words to censor.
     default: op
 
 commands:

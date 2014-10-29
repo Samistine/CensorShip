@@ -178,7 +178,8 @@ public class Censorship extends JavaPlugin implements Listener {
 
             print("Info", "Converting \"" + name + ".yml\"...");
 
-            JsonObject root = new Converter(new Censorship(), name).convert();
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(old);
+            JsonObject root = Converter.convert(cfg);
 
             File words = new File("plugins/CensorShip/words/" + name + ".json");
             int count = 0;
@@ -191,6 +192,7 @@ public class Censorship extends JavaPlugin implements Listener {
                 words.createNewFile();
             } catch (IOException ex) {
                 print("Error", "Could not create file \"" + words.getName() + "\".");
+                continue;
             }
 
             try {
@@ -198,9 +200,12 @@ public class Censorship extends JavaPlugin implements Listener {
                 stream.write(gson.toJson(root).getBytes());
             } catch (IOException ex) {
                 print("Error", "Could not write to file \"" + words.getName() + "\"...");
+                continue;
             }
 
-            words.delete();
+            print("Info", "Successfully converted \"" + name + ".yml\"...");
+
+            old.delete();
         }
 
         print("Info", "Done parsing.");

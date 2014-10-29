@@ -60,6 +60,7 @@ public class HelpCommand implements CommandExecutor {
         cs.sendMessage(ChatColor.GOLD + "/censor" + ChatColor.GRAY + " | Shows a list of all commands.");
         cs.sendMessage(ChatColor.GOLD + "/censor help" + ChatColor.GRAY + " | Shows a list of all commands.");
         cs.sendMessage(ChatColor.GOLD + "/censor help ..." + ChatColor.GRAY + " | Shows a list of commands for that action.");
+        cs.sendMessage(ChatColor.GOLD + "/censor list" + ChatColor.GRAY + " | Shows a list of all words.");
         cs.sendMessage(ChatColor.GOLD + "/censor reload" + ChatColor.GRAY + " | Reloads the config and words.");
         cs.sendMessage(ChatColor.GOLD + "/censor words" + ChatColor.GRAY + " | Lists all the words to censor.");
         cs.sendMessage(ChatColor.GOLD + "/censor test <method> <word> <message>" + ChatColor.GRAY + " | Executes a method to censor on the given word.");
@@ -69,5 +70,6 @@ public class HelpCommand implements CommandExecutor {
         cs.sendMessage(ChatColor.GOLD + "/censor remove exception ..." + ChatColor.GRAY + " | Removes an exception");
         cs.sendMessage(ChatColor.GOLD + "/censor update ..." + ChatColor.GRAY + " | Updates a word");
         cs.sendMessage(ChatColor.GOLD + "/censor penalty ..." + ChatColor.GRAY + " | Modifies penalty-points");
+        cs.sendMessage(ChatColor.GOLD + "/censor clear <player>" + ChatColor.GRAY + " | Removes (temp)ban/mute effect");
     }
 }
