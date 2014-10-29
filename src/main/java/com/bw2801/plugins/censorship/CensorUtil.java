@@ -135,22 +135,22 @@ public class CensorUtil {
                 }
             } else if (action.action == Action.TEMPBAN) {
                 PlayerHandler.tempBanPlayer(player.getName(), Config.getTempBanTime());
-                player.kickPlayer(Config.getMessage("tempbanned").replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE));
+                player.kickPlayer(Config.getMessage("tempbanned").replaceAll("<minutes>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE));
 
                 if (Config.getMessage("tempbanned-public").length() != 0) {
                     Bukkit.broadcastMessage(Config.getMessage("tempbanned-public")
-                            .replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE).replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                            .replaceAll("<minutes>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE).replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
                 }
             }
 
             if (Config.isTempBanEnabled()) {
                 if (PlayerHandler.getPenaltyPoints(player.getName()) >= Config.getTempBanPenaltyPoints()) {
                     PlayerHandler.tempBanPlayer(player.getName(), Config.getTempBanTime());
-                    player.kickPlayer(Config.getMessage("tempbanned").replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE));
+                    player.kickPlayer(Config.getMessage("tempbanned").replaceAll("<minutes>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE));
 
                     if (Config.getMessage("tempbanned-public").length() != 0) {
                         Bukkit.broadcastMessage(Config.getMessage("tempbanned-public")
-                                .replaceAll("<time>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE).replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
+                                .replaceAll("<minutes>", ChatColor.RED + "" + (Config.getTempBanTime() / 60) + ChatColor.WHITE).replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE));
                     }
                 }
             }
@@ -170,7 +170,7 @@ public class CensorUtil {
             if (Config.isMuteEnabled()) {
                 if (PlayerHandler.getPenaltyPoints(player.getName()) >= Config.getMutePenaltyPoints()) {
                     if (Config.getMessage("muted-public").length() != 0) {
-                        Bukkit.broadcastMessage(Config.getMessage("muted-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE).replaceAll("<time>", ChatColor.RED + "" + Config.getMuteTime() / 60 + ChatColor.WHITE));
+                        Bukkit.broadcastMessage(Config.getMessage("muted-public").replaceAll("<player>", ChatColor.GOLD + player.getName() + ChatColor.WHITE).replaceAll("<minutes>", ChatColor.RED + "" + Config.getMuteTime() / 60 + ChatColor.WHITE));
                     }
 
                     PlayerHandler.mutePlayer(player.getName(), Config.getMuteTime());

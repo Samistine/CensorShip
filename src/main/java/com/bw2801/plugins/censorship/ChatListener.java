@@ -18,7 +18,7 @@ public class ChatListener implements Listener {
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
         if (PlayerHandler.isTempBanned(event.getName())) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-            Config.getMessage("tempbanned-login").replaceAll("<time>", ChatColor.RED + "" + PlayerHandler.getTempBanTime(event.getName()) / 60 + ChatColor.WHITE));
+            Config.getMessage("tempbanned-login").replaceAll("<minutes>", ChatColor.RED + "" + PlayerHandler.getTempBanTime(event.getName()) / 60 + ChatColor.WHITE));
         }
     }
 
@@ -40,9 +40,7 @@ public class ChatListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        if (!Config.isCheckCommandsEnabled() || event.getPlayer().hasPermission("censor.bypass.censor")) {
-            return;
-        }
+        if (!Config.isCheckCommandsEnabled() || event.getPlayer().hasPermission("censor.bypass.censor")) return;
 
         String cmd = "";
         String msg = "";
@@ -110,6 +108,8 @@ public class ChatListener implements Listener {
             event.setCancelled(true);
             return;
         }
+
+        if (event.getPlayer().hasPermission("censor.bypass.censor")) return;
 
         String msg = event.getMessage();
         CensorResult result = CensorUtil.censor(msg, ReplaceActionManager.getActions());
