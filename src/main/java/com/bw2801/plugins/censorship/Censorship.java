@@ -77,6 +77,7 @@ public class Censorship extends JavaPlugin implements Listener {
     private static void loadWords() {
         print("Info", "Loading censored words.");
 
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         File config = new File("plugins/CensorShip/words-config.json");
         if (!config.exists()) {
             print("Warning", "Could not find \"words-config.json\".");
@@ -89,7 +90,6 @@ public class Censorship extends JavaPlugin implements Listener {
             }
             print("Info", "Trying to write to file \"words-config.json\"...");
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonObject root = new JsonObject();
             JsonArray files = new JsonArray();
             files.add(new JsonPrimitive("words"));
@@ -138,6 +138,7 @@ public class Censorship extends JavaPlugin implements Listener {
             }
         }
 
+        // Parse all known word files.
         JsonParser parser = new JsonParser();
         JsonElement element = null;
         try {
@@ -164,6 +165,42 @@ public class Censorship extends JavaPlugin implements Listener {
             Config.setWordSaveFile(root.get("command_created_words").getAsString() + ".json");
         } else {
             print("Error", "Could not read \"words-config.json\" file...");
+        }
+
+        // Convert and delete all old format word files
+        File convert = new File("plugins/CensorShip/words/convert/");
+        if (!convert.exists()) {
+            convert.mkdirs();
+        }
+
+        for (File old : convert.listFiles()) {
+            String name = old.getName().substring(0, old.getName().length() - 4);
+
+            print("Info", "Converting \"" + name + ".yml\"...");
+
+            JsonObject root = new Converter(new Censorship(), name).convert();
+
+            File words = new File("plugins/CensorShip/words/" + name + ".json");
+            int count = 0;
+            while (words.exists()) {
+                words = new File("plugins/CensorShip/words/" + name + count + ".json");
+                count++;
+            }
+
+            try {
+                words.createNewFile();
+            } catch (IOException ex) {
+                print("Error", "Could not create file \"" + words.getName() + "\".");
+            }
+
+            try {
+                FileOutputStream stream = new FileOutputStream(words);
+                stream.write(gson.toJson(root).getBytes());
+            } catch (IOException ex) {
+                print("Error", "Could not write to file \"" + words.getName() + "\"...");
+            }
+
+            words.delete();
         }
 
         print("Info", "Done parsing.");
