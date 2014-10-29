@@ -43,11 +43,10 @@ public class ReplaceActionManager {
         for (String fileName : files.keySet()) {
             try {
                 saveFile(fileName);
-                Censorship.print("Info", "Successfully saved words to file \"" + fileName + "\".");
             } catch (IOException ex) {
-                Censorship.print("Error", "Could not save words to file \"" + fileName + "\".");
             }
         }
+        Censorship.print("Info", "Successfully saved words.");
     }
 
     public static void saveFile(String fileName) throws IOException {
@@ -60,11 +59,9 @@ public class ReplaceActionManager {
 
         root.add("words", words);
 
-        System.out.println(fileName);
         try (FileOutputStream stream = new FileOutputStream(new File("plugins/CensorShip/words/" + fileName))) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             stream.write(gson.toJson(root).getBytes());
-            System.out.println(gson.toJson(root));
         }
     }
 

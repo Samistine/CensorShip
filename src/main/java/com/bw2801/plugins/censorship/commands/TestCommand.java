@@ -12,7 +12,7 @@ public class TestCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
         if (args.length < 4 || !args[0].equalsIgnoreCase("test")) return false;
-        if (!Censorship.hasPermission(cs, "censor.test")) return false;
+        if (!Censorship.hasPermission(cs, "censor.test")) return true;
 
         String method = null;
         for (String m : CensorUtil.getReplaceUtils()) {
@@ -23,8 +23,8 @@ public class TestCommand implements CommandExecutor {
         }
 
         if (method == null) {
-            cs.sendMessage(ChatColor.RED + "The given method is not availiable.");
-            return false;
+            cs.sendMessage(ChatColor.RED + "The given replace method is not availiable.");
+            return true;
         }
 
         String replace = ChatColor.GOLD + "***" + ChatColor.WHITE;

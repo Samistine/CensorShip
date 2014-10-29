@@ -19,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -36,7 +35,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class Censorship extends JavaPlugin implements Listener {
 
-    private Set<BukkitTask> tasks = new HashSet<>();
+    private final Set<BukkitTask> tasks = new HashSet<>();
 
     @Override
     public void onDisable() {
@@ -58,7 +57,7 @@ public class Censorship extends JavaPlugin implements Listener {
         loadWords();
         startSchedules();
 
-        getCommand("censor").setExecutor(new CSCommandListener(this));
+        getCommand("censor").setExecutor(new CSCommandListener());
         getServer().getPluginManager().registerEvents(new ChatListener(), this);
 
         print("Info", "Enabled!");
@@ -73,9 +72,6 @@ public class Censorship extends JavaPlugin implements Listener {
         CensorUtil.addReplaceUtil("default", new DefaultReplaceUtil());
         CensorUtil.addReplaceUtil("alternative", new AlternativeReplaceUtil());
         CensorUtil.addReplaceUtil("compact", new CompactReplaceUtil());
-        Set<String> utils = CensorUtil.getReplaceUtils();
-
-        print("Info", "Availiable replace methods (" + utils.size() + "): " + Arrays.toString(utils.toArray()));
     }
 
     private static void loadWords() {
@@ -276,7 +272,7 @@ public class Censorship extends JavaPlugin implements Listener {
 
             @Override
             public void run() {
-                throw new UnsupportedOperationException();
+                ReplaceActionManager.saveActions();
             }
         }, autoSaveInterval, autoSaveInterval));
     }

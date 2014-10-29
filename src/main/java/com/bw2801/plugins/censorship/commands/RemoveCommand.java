@@ -12,7 +12,7 @@ public class RemoveCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
         if (!(args.length > 1 && args[0].equalsIgnoreCase("remove"))) return false;
-        if (!Censorship.hasPermission(cs, "censor.remove")) return false;
+        if (!Censorship.hasPermission(cs, "censor.remove")) return true;
 
         if (args[1].equalsIgnoreCase("exception")) {
             String word = args[2];

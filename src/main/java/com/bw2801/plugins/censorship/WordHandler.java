@@ -38,6 +38,40 @@ public class WordHandler {
         return ra.exceptions.remove(word);
     }
 
+    public static boolean updateWord(String word, String replace, String action) {
+        ReplaceAction ra = getAction(word);
+        if (ra == null) return false;
+
+        ra.replace = replace;
+
+        try {
+            ra.action = Action.valueOf(action.toUpperCase());
+        } catch (Exception ex) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean updateWord(String word, String replace, String action, String method) {
+        ReplaceAction ra = getAction(word);
+        if (ra == null) return false;
+
+        ra.replace = replace;
+
+        try {
+            ra.action = Action.valueOf(action.toUpperCase());
+        } catch (Exception ex) {
+            return false;
+        }
+
+        if (!CensorUtil.getReplaceUtils().contains(method)) return false;
+
+        ra.method = method;
+
+        return true;
+    }
+
     public static boolean updateWord(String word, String replace, String action, String method, int dmg, int pp) {
         ReplaceAction ra = getAction(word);
         if (ra == null) return false;
@@ -50,9 +84,53 @@ public class WordHandler {
             return false;
         }
 
+        if (!CensorUtil.getReplaceUtils().contains(method)) return false;
+
         ra.method = method;
         ra.damage = dmg;
         ra.penaltyPoints = pp;
+
+        return true;
+    }
+
+    public static boolean updateWord(String word, String replace) {
+        ReplaceAction ra = getAction(word);
+        if (ra == null) return false;
+
+        ra.replace = replace;
+
+        return true;
+    }
+
+    public static boolean updateAction(String word, String action) {
+        ReplaceAction ra = getAction(word);
+        if (ra == null) return false;
+
+        try {
+            ra.action = Action.valueOf(action.toUpperCase());
+        } catch (Exception ex) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean updateMethod(String word, String method) {
+        ReplaceAction ra = getAction(word);
+        if (ra == null) return false;
+        if (!CensorUtil.getReplaceUtils().contains(method)) return false;
+
+        ra.method = method;
+
+        return true;
+    }
+
+    public static boolean updatePenalty(String word, int damage, int points) {
+        ReplaceAction ra = getAction(word);
+        if (ra == null) return false;
+
+        ra.damage = damage;
+        ra.penaltyPoints = points;
 
         return true;
     }

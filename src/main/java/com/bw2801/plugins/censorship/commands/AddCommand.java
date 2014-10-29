@@ -12,7 +12,7 @@ public class AddCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
         if (!(args.length > 3 && args[0].equalsIgnoreCase("add"))) return false;
-        if (!Censorship.hasPermission(cs, "censor.add")) return false;
+        if (!Censorship.hasPermission(cs, "censor.add")) return true;
 
         if (args[1].equalsIgnoreCase("exception")) {
             String word = args[2];

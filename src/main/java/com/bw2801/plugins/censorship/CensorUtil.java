@@ -191,6 +191,7 @@ public class CensorUtil {
 
     public static void addReplaceUtil(String name, ReplaceUtil util) {
         replaceUtils.put(name, util);
+        Censorship.print("Info", "Added replace method: \"" + name + "\"");
     }
 
     public static Set<String> getReplaceUtils() {

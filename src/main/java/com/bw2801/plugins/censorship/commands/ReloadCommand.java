@@ -11,7 +11,7 @@ public class ReloadCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
         if (!(args.length > 0 && args[0].equalsIgnoreCase("reload"))) return false;
-        if (!Censorship.hasPermission(cs, "censor.reload")) return false;
+        if (!Censorship.hasPermission(cs, "censor.reload")) return true;
 
         if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
             Censorship.reload();
