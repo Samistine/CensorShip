@@ -19,7 +19,7 @@ public class HelpCommand implements CommandExecutor {
         } else if (args.length == 2 && args[0].equalsIgnoreCase("help")) {
             if (args[1].equalsIgnoreCase("add")) {
                 cs.sendMessage(ChatColor.AQUA + "=== CensorShip | Help | Add ===");
-                cs.sendMessage(ChatColor.GOLD + "/censor add <word> <replace-with> <action> [method] [pp:dmg]" + ChatColor.GRAY + " | Adds a word");
+                cs.sendMessage(ChatColor.GOLD + "/censor add <word> <replace> <action> [method] [pp:dmg]" + ChatColor.GRAY + " | Adds a word");
                 cs.sendMessage(ChatColor.GOLD + "/censor add exception <word> <exception>" + ChatColor.GRAY + " | Adds an exception");
 
                 return true;
@@ -31,8 +31,8 @@ public class HelpCommand implements CommandExecutor {
                 return true;
             } else if (args[1].equalsIgnoreCase("update")) {
                 cs.sendMessage(ChatColor.AQUA + "=== CensorShip | Help | Update ===");
-                cs.sendMessage(ChatColor.GOLD + "/censor update <word> <replace-with> <action> [method] [pp:dmg]" + ChatColor.GRAY + " | Updates a word");
-                cs.sendMessage(ChatColor.GOLD + "/censor update <word> replace <replace-with>" + ChatColor.GRAY + " | Updates the word to replace with");
+                cs.sendMessage(ChatColor.GOLD + "/censor update <word> <replace> <action> [method] [pp:dmg]" + ChatColor.GRAY + " | Updates a word");
+                cs.sendMessage(ChatColor.GOLD + "/censor update <word> replace <replace>" + ChatColor.GRAY + " | Updates the word to replace with");
                 cs.sendMessage(ChatColor.GOLD + "/censor update <word> action <action>" + ChatColor.GRAY + " | Updates the action to execute");
                 cs.sendMessage(ChatColor.GOLD + "/censor update <word> method <method>" + ChatColor.GRAY + " | Updates the method to use to censor");
                 cs.sendMessage(ChatColor.GOLD + "/censor update <word> penalty <pp:dmg>" + ChatColor.GRAY + " | Updates the penalty-points and damage for that word");
@@ -59,14 +59,15 @@ public class HelpCommand implements CommandExecutor {
         cs.sendMessage(ChatColor.AQUA + "=== CensorShip | Help ===");
         cs.sendMessage(ChatColor.GOLD + "/censor" + ChatColor.GRAY + " | Shows a list of all commands.");
         cs.sendMessage(ChatColor.GOLD + "/censor help" + ChatColor.GRAY + " | Shows a list of all commands.");
+        cs.sendMessage(ChatColor.GOLD + "/censor help ..." + ChatColor.GRAY + " | Shows a list of commands for that action.");
         cs.sendMessage(ChatColor.GOLD + "/censor reload" + ChatColor.GRAY + " | Reloads the config and words.");
         cs.sendMessage(ChatColor.GOLD + "/censor words" + ChatColor.GRAY + " | Lists all the words to censor.");
         cs.sendMessage(ChatColor.GOLD + "/censor test <method> <word> <message>" + ChatColor.GRAY + " | Executes a method to censor on the given word.");
-        cs.sendMessage(ChatColor.GOLD + "/censor add <word> ..." + ChatColor.GRAY + " | Adds a word (" + ChatColor.GOLD + "/censor help add" + ChatColor.GRAY + ")");
-        cs.sendMessage(ChatColor.GOLD + "/censor add exception ..." + ChatColor.GRAY + " | Adds an exception (" + ChatColor.GOLD + "/censor help add" + ChatColor.GRAY + ")");
-        cs.sendMessage(ChatColor.GOLD + "/censor remove <word> ..." + ChatColor.GRAY + " | Removes a word (" + ChatColor.GOLD + "/censor help remove" + ChatColor.GRAY + ")");
-        cs.sendMessage(ChatColor.GOLD + "/censor remove exception ..." + ChatColor.GRAY + " | Removes an exception (" + ChatColor.GOLD + "/censor help remove" + ChatColor.GRAY + ")");
-        cs.sendMessage(ChatColor.GOLD + "/censor update ..." + ChatColor.GRAY + " | Updates a word (" + ChatColor.GOLD + "/censor help update" + ChatColor.GRAY + ")");
-        cs.sendMessage(ChatColor.GOLD + "/censor penalty ..." + ChatColor.GRAY + " | Modifies penalty-points (" + ChatColor.GOLD + "/censor help penalty" + ChatColor.GRAY + ")");
+        cs.sendMessage(ChatColor.GOLD + "/censor add <word> ..." + ChatColor.GRAY + " | Adds a word");
+        cs.sendMessage(ChatColor.GOLD + "/censor add exception ..." + ChatColor.GRAY + " | Adds an exception");
+        cs.sendMessage(ChatColor.GOLD + "/censor remove <word> ..." + ChatColor.GRAY + " | Removes a word");
+        cs.sendMessage(ChatColor.GOLD + "/censor remove exception ..." + ChatColor.GRAY + " | Removes an exception");
+        cs.sendMessage(ChatColor.GOLD + "/censor update ..." + ChatColor.GRAY + " | Updates a word");
+        cs.sendMessage(ChatColor.GOLD + "/censor penalty ..." + ChatColor.GRAY + " | Modifies penalty-points");
     }
 }

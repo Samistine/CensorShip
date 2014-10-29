@@ -11,6 +11,10 @@ public class CompactReplaceUtil implements ReplaceUtil {
             return source;
         }
 
+        // - Space at the beginning
+        // - Ignore the same character mutliple times in a row
+        // - Ignore any non-alphabetic characters
+        // - Ignore any digits and whitespaces between characters
         StringBuilder sb = new StringBuilder(4 * length - 3);
         sb.append("\\s");
         for (int i = 0; i < length - 1; i++) {
@@ -20,7 +24,7 @@ public class CompactReplaceUtil implements ReplaceUtil {
         sb.append(search.charAt(length - 1));
 
         String replace = source;
-        String result = replace.replaceAll("(?i)" + sb.toString(), search).trim();
+        String result = replace.replaceAll("(?i)" + sb.toString(), " " + search).trim();
         return result;
     }
 }

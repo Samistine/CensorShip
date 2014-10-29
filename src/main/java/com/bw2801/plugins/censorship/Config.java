@@ -17,7 +17,7 @@ public class Config {
     private static boolean tempBanEnabled = false;
 
     private static String wordSaveFile = "words.json";
-    private static int autoSaveWordsInteval = 0;
+    private static int autoSaveInterval = 0;
 
     private static int mutePenaltyPoints = 3;
     private static int banPenaltyPoints = 3;
@@ -34,12 +34,12 @@ public class Config {
         plugin = main;
     }
 
-    public static int getAutoSaveWordsInteval() {
-        return autoSaveWordsInteval;
+    public static int getAutoSaveInterval() {
+        return autoSaveInterval;
     }
 
-    public static void setAutoSaveWordsInteval(int autoSaveWordsInteval) {
-        Config.autoSaveWordsInteval = autoSaveWordsInteval;
+    public static void setAutoSaveInterval(int autoSaveInterval) {
+        Config.autoSaveInterval = autoSaveInterval;
     }
 
     public static void setWordSaveFile(String save) {
@@ -218,6 +218,7 @@ public class Config {
     }
 
     public static void load() {
+        plugin.getConfig().addDefault("config.autosave.interval", 300);
         plugin.getConfig().addDefault("config.damage.enabled", false);
         plugin.getConfig().addDefault("config.notify.enabled", false);
         plugin.getConfig().addDefault("config.signs.enabled", true);
@@ -241,6 +242,7 @@ public class Config {
         notifyEnabled = plugin.getConfig().getBoolean("config.notify.enabled", false);
         signsEnabled = plugin.getConfig().getBoolean("config.signs.enabled", false);
         commandsEnabled = plugin.getConfig().getBoolean("config.commands.enabled", false);
+        autoSaveInterval = plugin.getConfig().getInt("config.autosave.interval");
 
         banEnabled = plugin.getConfig().getBoolean("config.penalty-points.ban.enabled", false);
         banPenaltyPoints = plugin.getConfig().getInt("config.penalty-points.ban.points", 3);
@@ -287,8 +289,10 @@ public class Config {
         plugin.reloadMessageConfig();
 
         savePlayers();
+
         plugin.savePlayerConfig();
         plugin.reloadPlayerConfig();
+
     }
 
     private static void savePlayers() {

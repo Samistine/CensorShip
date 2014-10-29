@@ -18,19 +18,19 @@ public class UpdateCommand implements CommandExecutor {
             if (WordHandler.updateWord(args[1], args[3])) {
                 cs.sendMessage(ChatColor.WHITE + "Successfully updated \"" + ChatColor.GOLD + args[1] + ChatColor.WHITE + "\".");
             } else {
-                cs.sendMessage(ChatColor.RED + "Could not updat \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
+                cs.sendMessage(ChatColor.RED + "Could not update \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
             }
         } else if (args[2].equalsIgnoreCase("action")) {
             if (WordHandler.updateAction(args[1], args[3])) {
                 cs.sendMessage(ChatColor.WHITE + "Successfully updated \"" + ChatColor.GOLD + args[1] + ChatColor.WHITE + "\".");
             } else {
-                cs.sendMessage(ChatColor.RED + "Could not updat \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
+                cs.sendMessage(ChatColor.RED + "Could not update \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
             }
         } else if (args[2].equalsIgnoreCase("method")) {
             if (WordHandler.updateMethod(args[1], args[3])) {
                 cs.sendMessage(ChatColor.WHITE + "Successfully updated \"" + ChatColor.GOLD + args[1] + ChatColor.WHITE + "\".");
             } else {
-                cs.sendMessage(ChatColor.RED + "Could not updat \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
+                cs.sendMessage(ChatColor.RED + "Could not update \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
             }
         } else if (args[2].equalsIgnoreCase("penalty")) {
             boolean done = false;
@@ -44,7 +44,7 @@ public class UpdateCommand implements CommandExecutor {
             if (done) {
                 cs.sendMessage(ChatColor.WHITE + "Successfully updated \"" + ChatColor.GOLD + args[1] + ChatColor.WHITE + "\".");
             } else {
-                cs.sendMessage(ChatColor.RED + "Could not updat \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
+                cs.sendMessage(ChatColor.RED + "Could not update \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
             }
         } else {
             String word = args[1];
@@ -63,7 +63,7 @@ public class UpdateCommand implements CommandExecutor {
                 if (WordHandler.updateWord(word, replace, action, method)) {
                     cs.sendMessage(ChatColor.WHITE + "Successfully updated \"" + ChatColor.GOLD + args[1] + ChatColor.WHITE + "\".");
                 } else {
-                    cs.sendMessage(ChatColor.RED + "Could not updat \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
+                    cs.sendMessage(ChatColor.RED + "Could not update \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
                 }
             } else if (args.length == 6) {
                 try {
@@ -78,13 +78,13 @@ public class UpdateCommand implements CommandExecutor {
                 if (WordHandler.updateWord(word, replace, action, method, damage, points)) {
                     cs.sendMessage(ChatColor.WHITE + "Successfully updated \"" + ChatColor.GOLD + args[1] + ChatColor.WHITE + "\".");
                 } else {
-                    cs.sendMessage(ChatColor.RED + "Could not updat \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
+                    cs.sendMessage(ChatColor.RED + "Could not update \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
                 }
             } else {
                 if (WordHandler.updateWord(word, replace, action)) {
                     cs.sendMessage(ChatColor.WHITE + "Successfully updated \"" + ChatColor.GOLD + args[1] + ChatColor.WHITE + "\".");
                 } else {
-                    cs.sendMessage(ChatColor.RED + "Could not updat \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
+                    cs.sendMessage(ChatColor.RED + "Could not update \"" + ChatColor.GOLD + args[1] + ChatColor.RED + "\".");
                 }
             }
         }

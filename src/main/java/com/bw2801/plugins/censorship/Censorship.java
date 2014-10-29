@@ -94,7 +94,6 @@ public class Censorship extends JavaPlugin implements Listener {
             JsonArray files = new JsonArray();
             files.add(new JsonPrimitive("words"));
             root.add("command_created_words", new JsonPrimitive("words"));
-            root.add("auto_save_interval", new JsonPrimitive(300));
             root.add("word_files_used", files);
 
             try {
@@ -163,7 +162,6 @@ public class Censorship extends JavaPlugin implements Listener {
             }
 
             Config.setWordSaveFile(root.get("command_created_words").getAsString() + ".json");
-            Config.setAutoSaveWordsInteval(root.get("auto_save_interval").getAsInt());
         } else {
             print("Error", "Could not read \"words-config.json\" file...");
         }
@@ -267,12 +265,14 @@ public class Censorship extends JavaPlugin implements Listener {
             }
         }, 20l, 20l));
 
-        long autoSaveInterval = 20l * Config.getAutoSaveWordsInteval();
+        long autoSaveInterval = 20l * Config.getAutoSaveInterval();
         tasks.add(Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
 
             @Override
             public void run() {
+                Config.save();
                 ReplaceActionManager.saveActions();
+                print("Info", "Autosave successfull.");
             }
         }, autoSaveInterval, autoSaveInterval));
     }
